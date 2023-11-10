@@ -6,8 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const http_1 = __importDefault(require("http"));
+const morgan_1 = __importDefault(require("morgan"));
 const socketServer_1 = __importDefault(require("./socketServer"));
 const usuario_1 = __importDefault(require("../routes/usuario"));
+const db_1 = __importDefault(require("./db"));
 class Server {
     constructor() {
         this.apiPaths = {
@@ -17,9 +19,11 @@ class Server {
         this.port = process.env.PORT || "3001";
         this.server = http_1.default.createServer(this.app);
         this.middlewares();
+        this.app.use((0, morgan_1.default)('dev'));
         //rutas
         this.routes();
         (0, socketServer_1.default)(this.server);
+        (0, db_1.default)();
     }
     middlewares() {
         //cors

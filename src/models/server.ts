@@ -1,9 +1,11 @@
 import express, { Application } from "express";
 import cors from "cors";
 import http from 'http';
-import initSocket from './socketServer';
+import morgan from 'morgan';
 
+import initSocket from './socketServer';
 import userRoutes from "../routes/usuario";
+import cn from "./db";
 
 class Server {
   private app: Application;
@@ -19,10 +21,13 @@ class Server {
     this.port = process.env.PORT || "3001";
     this.server = http.createServer(this.app);
     this.middlewares();
+    this.app.use(morgan('dev'));
 
     //rutas
     this.routes();
     initSocket(this.server);
+    cn();
+  
   }
   private middlewares() {
     //cors
