@@ -16,14 +16,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config(); // Carga las variables de entorno desde el archivo .env
+//todo: mejorar la coneccion de la base de datos  useNewUrlParser y useUnifiedTopology
 const cn = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const dbUrl = process.env.MONGODB_URI || `mongodb://testserver:${process.env.MONGODB_PORT}/bchat`;
-        yield mongoose_1.default.connect(dbUrl);
-        console.log('Connected to MongoDB');
+        const dbUrl = `mongodb://${process.env.MONGODB_URI}:${process.env.MONGODB_PORT}/${process.env.MONGODB_DB}`;
+        const options = {};
+        yield mongoose_1.default.connect(dbUrl, options);
+        console.log("Connected to MongoDB");
     }
     catch (error) {
-        console.error('Error connecting to MongoDB:', error);
+        console.error("Error connecting to MongoDB:", error);
     }
 });
 exports.default = cn;
