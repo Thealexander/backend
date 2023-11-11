@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import Users, { IUser } from "../interfaces/users.interface";
 import dotenv from "dotenv";
+ 
+import { removeFromInvalidTokens } from "../middlewares/tokenValidations";
+import Users, { IUser } from "../interfaces/users.interface";
 dotenv.config();
 
 export const signup = async (req: Request, res: Response) => {
@@ -83,5 +85,14 @@ export const profile = async (req: Request, res: Response) => {
 };
 
 export const logout = (req: Request, res: Response) => {
-  res.send("logout");
+    // Invalidar el token actual
+    const token = req.header('auth-token');
+    if (token) {
+      removeFromInvalidTokens(token);
+    }
+  
+    // Limpiar el userId del objeto de solicitud (request)
+    req.userId = undefined;
+  
+    res.status(200).json({ message: "Logout successful" });
 };

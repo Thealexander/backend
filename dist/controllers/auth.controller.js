@@ -15,8 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.logout = exports.profile = exports.signin = exports.signup = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const users_interface_1 = __importDefault(require("../interfaces/users.interface"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const tokenValidations_1 = require("../middlewares/tokenValidations");
+const users_interface_1 = __importDefault(require("../interfaces/users.interface"));
 dotenv_1.default.config();
 const signup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -83,7 +84,14 @@ const profile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.profile = profile;
 const logout = (req, res) => {
-    res.send("logout");
+    // Invalidar el token actual
+    const token = req.header('auth-token');
+    if (token) {
+        (0, tokenValidations_1.removeFromInvalidTokens)(token);
+    }
+    // Limpiar el userId del objeto de solicitud (request)
+    req.userId = undefined;
+    res.status(200).json({ message: "Logout successful" });
 };
 exports.logout = logout;
 //# sourceMappingURL=auth.controller.js.map

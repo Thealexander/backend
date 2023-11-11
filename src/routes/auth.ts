@@ -5,13 +5,13 @@ import {
     profile,
     logout,
 } from "../controllers/auth.controller";
-import { tokenValidation } from "../middlewares/validatetoken";
+import { tokenValidation,} from "../middlewares/validatetoken";
 
 const router: Router = Router();
 
 router.post('/signup', signup);
 router.post('/signin', signin);
-router.get('/profile',tokenValidation, profile);
-router.post('/logout', logout);
+router.get('/profile', tokenValidation, profile);
+router.post('/logout', tokenValidation, logout);
 
 export default router;

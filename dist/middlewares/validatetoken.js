@@ -7,7 +7,7 @@ exports.tokenValidation = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const tokenValidation = (req, res, next) => {
     try {
-        const token = req.header('auth-token');
+        const token = req.header("auth-token");
         if (!token) {
             return res
                 .status(401)
