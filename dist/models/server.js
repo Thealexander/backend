@@ -26,7 +26,7 @@ class Server {
             this.app.use((0, morgan_1.default)("dev"));
         }
         this.middlewares();
-        //rutas
+        //Servicios a cargar
         (0, db_1.default)();
         (0, socketServer_1.default)(this.server);
         this.routes();

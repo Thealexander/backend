@@ -105,7 +105,6 @@ export const profile = async (req: ExtendedRequest, res: Response) => {
         }
       }
     }
-
     res.json(user);
   } catch (error) {
     console.error(error);

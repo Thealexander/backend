@@ -31,7 +31,7 @@ class Server {
 
     this.middlewares();
 
-    //rutas
+    //Servicios a cargar
     cn();
     initSocket(this.server);
     this.routes();
