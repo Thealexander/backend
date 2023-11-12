@@ -6,6 +6,7 @@ export interface IUser extends Document {
     mobile: number;
     password: string;
     avatar: string;
+    exp?: number;
 }
 declare const Users: Model<IUser>;
 export default Users;

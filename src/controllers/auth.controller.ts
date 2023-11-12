@@ -2,10 +2,16 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
- 
+
 import { removeFromInvalidTokens } from "../middlewares/tokenValidations";
+import { refreshAccessToken } from "../helpers/refreshToken";
 import Users, { IUser } from "../interfaces/users.interface";
+import { IPayload } from "../interfaces/payload.interface";
 dotenv.config();
+
+interface ExtendedRequest extends Request {
+  exp?: number;
+}
 
 export const signup = async (req: Request, res: Response) => {
   try {
@@ -36,7 +42,6 @@ export const signup = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Error creating user" });
   }
 };
-
 export const signin = async (req: Request, res: Response) => {
   try {
     // Buscar usuario por nombre de usuario
@@ -71,11 +76,35 @@ export const signin = async (req: Request, res: Response) => {
   }
 };
 
-export const profile = async (req: Request, res: Response) => {
+export const profile = async (req: ExtendedRequest, res: Response) => {
   try {
-    // Obtener el usuario asociado al token
     const user = await Users.findById(req.userId);
     if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Check if the access token is about to expire
+    const expirationThreshold = 60 * 5; // 5 minutes
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    const userExp = user.exp;
+    if (userExp !== undefined) {
+      const payload = jwt.verify(
+        userExp.toString(),
+        process.env.RANDOM_KEY || ""
+      ) as IPayload;
+      (req as ExtendedRequest).exp = payload.exp;
+
+      if (req.exp! - currentTime < expirationThreshold) {
+        // If the access token is about to expire, refresh it
+        const newToken = refreshAccessToken(req, res);
+
+        if ("accessToken" in newToken) {
+          return res.json({
+            user,
+            accessToken: newToken.accessToken,
+          });
+        }
+      }
+    }
 
     res.json(user);
   } catch (error) {
@@ -85,14 +114,23 @@ export const profile = async (req: Request, res: Response) => {
 };
 
 export const logout = (req: Request, res: Response) => {
+  try {
     // Invalidar el token actual
-    const token = req.header('auth-token');
+    const token = req.header("auth-token");
     if (token) {
       removeFromInvalidTokens(token);
+
+      // Limpiar el userId del objeto de solicitud (request)
+      req.userId = undefined;
+
+      // Envía una respuesta con código 204 (No Content) para indicar éxito sin contenido adicional
+      res.status(204).end();
+    } else {
+      // Si no se proporciona un token, devuelve un código 400 (Bad Request) u otro código apropiado
+      res.status(400).json({ error: "Token not provided" });
     }
-  
-    // Limpiar el userId del objeto de solicitud (request)
-    req.userId = undefined;
-  
-    res.status(200).json({ message: "Logout successful" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error during logout" });
+  }
 };

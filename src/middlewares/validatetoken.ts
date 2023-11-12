@@ -11,7 +11,7 @@ export const tokenValidation = (
   next: NextFunction
 ) => {
   try {
-    const token = req.header("auth-token");
+    const token = req.header('auth-token');
 
     if (!token) {
       return res

@@ -7,6 +7,7 @@ export interface IUser extends Document {
   mobile: number;
   password: string;
   avatar: string;
+  exp?: number;
 }
 
 const UserSchema = new mongoose.Schema({

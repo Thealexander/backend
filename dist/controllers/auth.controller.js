@@ -17,6 +17,7 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const tokenValidations_1 = require("../middlewares/tokenValidations");
+const refreshToken_1 = require("../helpers/refreshToken");
 const users_interface_1 = __importDefault(require("../interfaces/users.interface"));
 dotenv_1.default.config();
 const signup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -71,10 +72,27 @@ const signin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.signin = signin;
 const profile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // Obtener el usuario asociado al token
         const user = yield users_interface_1.default.findById(req.userId);
         if (!user)
             return res.status(404).json({ error: "User not found" });
+        // Check if the access token is about to expire
+        const expirationThreshold = 60 * 5; // 5 minutes
+        const currentTime = Math.floor(Date.now() / 1000);
+        const userExp = user.exp;
+        if (userExp !== undefined) {
+            const payload = jsonwebtoken_1.default.verify(userExp.toString(), process.env.RANDOM_KEY || "");
+            req.exp = payload.exp;
+            if (req.exp - currentTime < expirationThreshold) {
+                // If the access token is about to expire, refresh it
+                const newToken = (0, refreshToken_1.refreshAccessToken)(req, res);
+                if ("accessToken" in newToken) {
+                    return res.json({
+                        user,
+                        accessToken: newToken.accessToken,
+                    });
+                }
+            }
+        }
         res.json(user);
     }
     catch (error) {
@@ -84,14 +102,25 @@ const profile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.profile = profile;
 const logout = (req, res) => {
-    // Invalidar el token actual
-    const token = req.header('auth-token');
-    if (token) {
-        (0, tokenValidations_1.removeFromInvalidTokens)(token);
+    try {
+        // Invalidar el token actual
+        const token = req.header("auth-token");
+        if (token) {
+            (0, tokenValidations_1.removeFromInvalidTokens)(token);
+            // Limpiar el userId del objeto de solicitud (request)
+            req.userId = undefined;
+            // Envía una respuesta con código 204 (No Content) para indicar éxito sin contenido adicional
+            res.status(204).end();
+        }
+        else {
+            // Si no se proporciona un token, devuelve un código 400 (Bad Request) u otro código apropiado
+            res.status(400).json({ error: "Token not provided" });
+        }
     }
-    // Limpiar el userId del objeto de solicitud (request)
-    req.userId = undefined;
-    res.status(200).json({ message: "Logout successful" });
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error during logout" });
+    }
 };
 exports.logout = logout;
 //# sourceMappingURL=auth.controller.js.map
