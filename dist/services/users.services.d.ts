@@ -30,7 +30,7 @@ declare class UserService {
             _id: import("mongoose").Types.ObjectId;
         };
     }>;
-    readAllUsers(): Promise<(import("mongoose").Document<unknown, {}, IUser> & IUser & {
+    readAllUsers(userId: string): Promise<(import("mongoose").Document<unknown, {}, IUser> & IUser & {
         _id: import("mongoose").Types.ObjectId;
     })[]>;
     readUser(userId: string): Promise<import("mongoose").Document<unknown, {}, IUser> & IUser & {
@@ -44,6 +44,8 @@ declare class UserService {
     deleteUser(userId: string): Promise<import("mongoose").Document<unknown, {}, IUser> & IUser & {
         _id: import("mongoose").Types.ObjectId;
     }>;
+    getMe(userId: string): Promise<IUser | null>;
+    updateOwnProfile(userId: string, updatedProfile: IUser): Promise<IUser | null>;
 }
 declare const _default: UserService;
 export default _default;

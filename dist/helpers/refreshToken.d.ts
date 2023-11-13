@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { IPayload } from "../interfaces/payload.interface";
+import { IPayload } from "../interfaces";
 interface ExtendedRequest extends Request {
     userId?: string;
 }

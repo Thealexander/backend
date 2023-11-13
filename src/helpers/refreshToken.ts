@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
-import { IPayload } from "../interfaces/payload.interface";
+import { IPayload } from "../interfaces";
 
 const refreshTokens: Set<string> = new Set();
 const refreshTokenLimits: Map<string, number> = new Map();

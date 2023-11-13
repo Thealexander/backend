@@ -23,7 +23,7 @@ class UserService {
             try {
                 if (typeof user.password !== "string") {
                     console.log("password", user.password);
-                    throw new Error("unfuctional password");
+                    throw new Error(" incorrect password ");
                 }
                 const salt = yield bcrypt_1.default.genSalt();
                 const hashedPassword = yield bcrypt_1.default.hash(user.password, salt);
@@ -38,10 +38,10 @@ class UserService {
         });
     }
     //Read Users
-    readAllUsers() {
+    readAllUsers(userId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const allUsers = yield users_interface_1.default.find();
+                const allUsers = yield users_interface_1.default.find({ _id: { $ne: userId } }).select(["-password"]);
                 return allUsers;
             }
             catch (error) {
@@ -54,8 +54,8 @@ class UserService {
     readUser(userId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log('id', userId);
-                const user = yield users_interface_1.default.findById(userId);
+                // console.log('id', userId)
+                const user = yield users_interface_1.default.findById(userId).select(["-password"]);
                 if (!user) {
                     throw new Error("User not found");
                 }
@@ -103,6 +103,51 @@ class UserService {
             catch (error) {
                 console.error(`Error deleting user with ID ${userId}:`, error);
                 throw new Error("Error deleting user");
+            }
+        });
+    }
+    //logged User Information
+    getMe(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const user = yield users_interface_1.default.findById(userId);
+                return user;
+            }
+            catch (error) {
+                console.error("Error fetching user:", error);
+                return null;
+            }
+        });
+    }
+    // update info de perfil
+    updateOwnProfile(userId, updatedProfile) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                if (!userId) {
+                    throw new Error("User ID is undefined");
+                }
+                const existingUser = yield users_interface_1.default.findById(userId);
+                if (!existingUser) {
+                    throw new Error("User not found");
+                }
+                // Verificar si se proporcionó una nueva contraseña
+                if (updatedProfile.password) {
+                    // Hash de la nueva contraseña
+                    const salt = yield bcrypt_1.default.genSalt();
+                    updatedProfile.password = yield bcrypt_1.default.hash(updatedProfile.password, salt);
+                }
+                // Actualizar el perfil del usuario
+                const updatedUser = yield users_interface_1.default.findByIdAndUpdate(userId, updatedProfile, { new: true });
+                if (!updatedUser) {
+                    throw new Error("Error updating user");
+                }
+                // No devolver la contraseña en la respuesta
+                updatedUser.password = '';
+                return updatedUser;
+            }
+            catch (error) {
+                console.error(`Error updating own profile for user with ID ${userId}:`, error);
+                return null;
             }
         });
     }

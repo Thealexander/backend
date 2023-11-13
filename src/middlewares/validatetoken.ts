@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { IPayload } from "../interfaces/payload.interface";
+import { IPayload } from "../interfaces";
 
 interface ExtendedRequest extends Request {
   userId?: string;

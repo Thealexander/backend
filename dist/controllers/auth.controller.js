@@ -12,13 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logout = exports.profile = exports.signin = exports.signup = void 0;
+exports.updateOwnProfile = exports.getMe = exports.logout = exports.profile = exports.signin = exports.signup = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const tokenValidations_1 = require("../middlewares/tokenValidations");
+const middlewares_1 = require("../middlewares");
 const refreshToken_1 = require("../helpers/refreshToken");
-const users_interface_1 = __importDefault(require("../interfaces/users.interface"));
+const interfaces_1 = require("../interfaces/");
 dotenv_1.default.config();
 const signup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -29,11 +29,11 @@ const signup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         // req.body.email && (req.body.email = req.body.email.toLowerCase());
         // (!req.body.email) ? res.status(400).json({ error: "Email is required" }) : req.body.email = req.body.email.toLowerCase();
         // Generar token
-        console.log("secrect Key", process.env.RANDOM_KEY);
+        //console.log("secrect Key", process.env.RANDOM_KEY);
         const token = jsonwebtoken_1.default.sign({ userId: req.body._id }, process.env.RANDOM_KEY || "", {
             expiresIn: "7",
         });
-        const user = yield users_interface_1.default.create(req.body);
+        const user = yield interfaces_1.Users.create(req.body);
         res.status(201).json({ user, token });
         // res.header('auth-token', token).json(user);
         console.log(req.body);
@@ -48,7 +48,7 @@ exports.signup = signup;
 const signin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Buscar usuario por nombre de usuario
-        const user = yield users_interface_1.default.findOne({
+        const user = yield interfaces_1.Users.findOne({
             username: req.body.username.toLowerCase(),
         });
         // Verificar si el usuario existe
@@ -72,7 +72,7 @@ const signin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.signin = signin;
 const profile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield users_interface_1.default.findById(req.userId);
+        const user = yield interfaces_1.Users.findById(req.userId);
         if (!user)
             return res.status(404).json({ error: "User not found" });
         // Check if the access token is about to expire
@@ -106,7 +106,7 @@ const logout = (req, res) => {
         // Invalidar el token actual
         const token = req.header("auth-token");
         if (token) {
-            (0, tokenValidations_1.removeFromInvalidTokens)(token);
+            (0, middlewares_1.removeFromInvalidTokens)(token);
             // Limpiar el userId del objeto de solicitud (request)
             req.userId = undefined;
             // Envía una respuesta con código 204 (No Content) para indicar éxito sin contenido adicional
@@ -123,4 +123,63 @@ const logout = (req, res) => {
     }
 };
 exports.logout = logout;
+const getMe = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = yield interfaces_1.Users.findById(req.userId);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        const expirationThreshold = 60 * 5; // 5 minutos
+        const currentTime = Math.floor(Date.now() / 1000);
+        const userExp = user.exp;
+        if (userExp !== undefined) {
+            // Verificar si el token de acceso está a punto de expirar
+            const payload = jsonwebtoken_1.default.verify(userExp.toString(), process.env.RANDOM_KEY || "");
+            req.exp = payload.exp;
+            if (req.exp - currentTime < expirationThreshold) {
+                // Si el token de acceso está a punto de expirar, refrescarlo
+                const newToken = (0, refreshToken_1.refreshAccessToken)(req, res);
+                if ("accessToken" in newToken) {
+                    return res.json({
+                        user,
+                        accessToken: newToken.accessToken,
+                    });
+                }
+            }
+        }
+        // Si no se refresca el token, solo envía el usuario
+        return res.json({ user });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error fetching profile" });
+    }
+});
+exports.getMe = getMe;
+const updateOwnProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        if (!req.userId) {
+            throw new Error("User ID is undefined");
+        }
+        const existingUser = yield interfaces_1.Users.findById(req.userId);
+        if (!existingUser) {
+            throw new Error("User not found");
+        }
+        const updatedProfile = Object.assign(Object.assign({}, existingUser.toObject()), req.body);
+        if (updatedProfile.password) {
+            const salt = yield bcrypt_1.default.genSalt();
+            updatedProfile.password = yield bcrypt_1.default.hash(updatedProfile.password, salt);
+        }
+        const updatedUser = yield interfaces_1.Users.findByIdAndUpdate(req.userId, updatedProfile, { new: true });
+        if (!updatedProfile)
+            throw new Error("error updating user");
+        updatedProfile.password = "";
+        res.status(201).json(updatedUser);
+    }
+    catch (error) {
+        console.error(`Error updating own profile for user with ID ${req.userId}:`, error);
+        res.status(500).json({ error: "Error updating your profile" });
+    }
+});
+exports.updateOwnProfile = updateOwnProfile;
 //# sourceMappingURL=auth.controller.js.map

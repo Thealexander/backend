@@ -3,10 +3,10 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
-import { removeFromInvalidTokens } from "../middlewares/tokenValidations";
+import { removeFromInvalidTokens } from "../middlewares";
 import { refreshAccessToken } from "../helpers/refreshToken";
-import Users, { IUser } from "../interfaces/users.interface";
-import { IPayload } from "../interfaces/payload.interface";
+import { IPayload, IUser, Users } from "../interfaces/";
+
 dotenv.config();
 
 interface ExtendedRequest extends Request {
@@ -23,7 +23,7 @@ export const signup = async (req: Request, res: Response) => {
     // (!req.body.email) ? res.status(400).json({ error: "Email is required" }) : req.body.email = req.body.email.toLowerCase();
 
     // Generar token
-    console.log("secrect Key", process.env.RANDOM_KEY);
+    //console.log("secrect Key", process.env.RANDOM_KEY);
     const token: string = jwt.sign(
       { userId: req.body._id },
       process.env.RANDOM_KEY || "",
@@ -131,5 +131,85 @@ export const logout = (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error during logout" });
+  }
+};
+
+export const getMe = async (req: ExtendedRequest, res: Response) => {
+  try {
+    const user = await Users.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const expirationThreshold = 60 * 5; // 5 minutos
+    const currentTime = Math.floor(Date.now() / 1000);
+    const userExp = user.exp;
+
+    if (userExp !== undefined) {
+      // Verificar si el token de acceso está a punto de expirar
+      const payload = jwt.verify(
+        userExp.toString(),
+        process.env.RANDOM_KEY || ""
+      ) as IPayload;
+      req.exp = payload.exp;
+
+      if (req.exp! - currentTime < expirationThreshold) {
+        // Si el token de acceso está a punto de expirar, refrescarlo
+        const newToken = refreshAccessToken(req, res);
+
+        if ("accessToken" in newToken) {
+          return res.json({
+            user,
+            accessToken: newToken.accessToken,
+          });
+        }
+      }
+    }
+
+    // Si no se refresca el token, solo envía el usuario
+    return res.json({ user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error fetching profile" });
+  }
+};
+
+export const updateOwnProfile = async (req: ExtendedRequest, res: Response) => {
+  try {
+    if (!req.userId) {
+      throw new Error("User ID is undefined");
+    }
+    const existingUser = await Users.findById(req.userId);
+
+    if (!existingUser) {
+      throw new Error("User not found");
+    }
+    const updatedProfile: IUser = {
+      ...existingUser.toObject(), // Convertir a objeto para copiar todas las propiedades
+      ...req.body, // Sobrescribir con las nuevas propiedades del cuerpo de la solicitud
+    };
+    if (updatedProfile.password) {
+      const salt = await bcrypt.genSalt();
+      updatedProfile.password = await bcrypt.hash(
+        updatedProfile.password,
+        salt
+      );
+    }
+    const updatedUser = await Users.findByIdAndUpdate(
+      req.userId,
+      updatedProfile,
+      { new: true }
+    );
+
+    if (!updatedProfile) throw new Error("error updating user");
+
+    updatedProfile.password = "";
+
+    res.status(201).json(updatedUser);
+  } catch (error) {
+    console.error(
+      `Error updating own profile for user with ID ${req.userId}:`,
+      error
+    );
+    res.status(500).json({ error: "Error updating your profile" });
   }
 };

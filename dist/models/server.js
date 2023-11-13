@@ -10,8 +10,7 @@ const morgan_1 = __importDefault(require("morgan"));
 const path_1 = __importDefault(require("path"));
 //import bodyParser from "body-parser";
 const socketServer_1 = __importDefault(require("./socketServer"));
-const user_1 = __importDefault(require("../routes/user"));
-const auth_1 = __importDefault(require("../routes/auth"));
+const routes_1 = require("../routes");
 const db_1 = __importDefault(require("./db"));
 class Server {
     constructor() {
@@ -42,8 +41,8 @@ class Server {
         this.app.use(express_1.default.static(publicF));
     }
     routes() {
-        this.app.use(this.apiPaths.usuarios, user_1.default);
-        this.app.use(this.apiPaths.auth, auth_1.default);
+        this.app.use(this.apiPaths.usuarios, routes_1.userRoutes);
+        this.app.use(this.apiPaths.auth, routes_1.authRoutes);
         //404 error
         this.app.use((req, res) => {
             res.status(404).send("Not Found");

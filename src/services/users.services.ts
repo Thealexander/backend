@@ -11,7 +11,7 @@ class UserService {
     try {
       if (typeof user.password !== "string") {
           console.log("password", user.password);
-        throw new Error("unfuctional password");
+        throw new Error(" incorrect password ");
       }
       const salt = await bcrypt.genSalt();
       const hashedPassword = await bcrypt.hash(user.password, salt);
@@ -26,9 +26,11 @@ class UserService {
     }
   }
   //Read Users
-  async readAllUsers() {
+  async readAllUsers(userId: string) {
     try {
-      const allUsers = await Users.find();
+      
+      
+      const allUsers = await Users.find({_id:{$ne: userId}}).select(["-password"]);
       return allUsers;
     } catch (error) {
       console.error("Error reading all users:", error);
@@ -38,8 +40,8 @@ class UserService {
   //Read User
   async readUser(userId: string) {
     try {
-        console.log('id', userId)
-      const user = await Users.findById(userId);
+       // console.log('id', userId)
+      const user = await Users.findById(userId).select(["-password"]);
       if (!user) {
         throw new Error("User not found");
       }
@@ -84,6 +86,53 @@ class UserService {
       throw new Error("Error deleting user");
     }
   }
+  //logged User Information
+  async getMe(userId: string): Promise<IUser | null> {
+    try {
+      const user = await Users.findById(userId);
+      return user;
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      return null;
+    }
+  }
+// update info de perfil
+  async updateOwnProfile(userId: string, updatedProfile: IUser): Promise<IUser | null> {
+    try {
+      if (!userId) {
+        throw new Error("User ID is undefined");
+      }
+
+      const existingUser = await Users.findById(userId);
+
+      if (!existingUser) {
+        throw new Error("User not found");
+      }
+
+      // Verificar si se proporcionó una nueva contraseña
+      if (updatedProfile.password) {
+        // Hash de la nueva contraseña
+        const salt = await bcrypt.genSalt();
+        updatedProfile.password = await bcrypt.hash(updatedProfile.password, salt);
+      }
+
+      // Actualizar el perfil del usuario
+      const updatedUser = await Users.findByIdAndUpdate(userId, updatedProfile, { new: true });
+
+      if (!updatedUser) {
+        throw new Error("Error updating user");
+      }
+
+      // No devolver la contraseña en la respuesta
+      updatedUser.password = '';
+
+      return updatedUser;
+    } catch (error) {
+      console.error(`Error updating own profile for user with ID ${userId}:`, error);
+      return null;
+    }
+  }
+
 }
 
 export default new UserService();

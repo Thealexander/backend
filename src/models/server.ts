@@ -6,8 +6,7 @@ import path from "path";
 //import bodyParser from "body-parser";
 
 import initSocket from "./socketServer";
-import userRoutes from "../routes/user";
-import authRoutes from "../routes/auth";
+import {authRoutes, userRoutes} from '../routes';
 import cn from "./db";
 
 class Server {
