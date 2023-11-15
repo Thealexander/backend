@@ -41,7 +41,7 @@ class UserService {
   async readUser(userId: string) {
     try {
        // console.log('id', userId)
-      const user = await Users.findById(userId).select(["-password"]);
+      const user = await Users.findById(userId); //.select(["-password"])
       if (!user) {
         throw new Error("User not found");
       }

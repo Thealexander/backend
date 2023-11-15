@@ -12,7 +12,7 @@ import { tokenValidation } from "../middlewares";
 const router = Router();
 
 router.get("/", tokenValidation, readAllUsers);
-router.get("/:_id", tokenValidation, readUser);
+router.get("/:_id", readUser);
 router.post("/", tokenValidation, createUser);
 router.put("/:_id", tokenValidation, updateUser);
 router.delete("/:_id", tokenValidation, deleteUser);

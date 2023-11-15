@@ -2,10 +2,13 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import * as fs from "fs";
 
 import { removeFromInvalidTokens } from "../middlewares";
 import { refreshAccessToken } from "../helpers/refreshToken";
 import { IPayload, IUser, Users } from "../interfaces/";
+import { getFilePath } from "../helpers/imgHelper";
+//import { IUser } from '../interfaces/users.interface';
 
 dotenv.config();
 
@@ -18,6 +21,7 @@ export const signup = async (req: Request, res: Response) => {
     const salt = await bcrypt.genSalt();
     const hashpassword = await bcrypt.hash(req.body.password, salt);
     req.body.password = hashpassword;
+    req.body.avatar = "";
     req.body.username = req.body.username.toLowerCase();
     // req.body.email && (req.body.email = req.body.email.toLowerCase());
     // (!req.body.email) ? res.status(400).json({ error: "Email is required" }) : req.body.email = req.body.email.toLowerCase();
@@ -75,7 +79,6 @@ export const signin = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Error during login" });
   }
 };
-
 export const profile = async (req: ExtendedRequest, res: Response) => {
   try {
     const user = await Users.findById(req.userId);
@@ -111,7 +114,6 @@ export const profile = async (req: ExtendedRequest, res: Response) => {
     res.status(500).json({ error: "Error fetching profile" });
   }
 };
-
 export const logout = (req: Request, res: Response) => {
   try {
     // Invalidar el token actual
@@ -133,7 +135,6 @@ export const logout = (req: Request, res: Response) => {
     res.status(500).json({ error: "Error during logout" });
   }
 };
-
 export const getMe = async (req: ExtendedRequest, res: Response) => {
   try {
     const user = await Users.findById(req.userId);
@@ -175,36 +176,42 @@ export const getMe = async (req: ExtendedRequest, res: Response) => {
 
 export const updateOwnProfile = async (req: ExtendedRequest, res: Response) => {
   try {
-    if (!req.userId) {
-      throw new Error("User ID is undefined");
-    }
     const existingUser = await Users.findById(req.userId);
+    console.log("Usuario existente", existingUser);
+    console.log("Contenido de req.file", req.file);
 
-    if (!existingUser) {
-      throw new Error("User not found");
+    const newUserData = req.body;
+    console.log("Usuario existente", newUserData);
+
+    if (req.file && existingUser?.avatar) {
+      const imgPath = getFilePath(req.file);
+      console.log(imgPath);
+      newUserData.avatar = imgPath;
+      if (existingUser?.avatar) {
+        fs.unlink(existingUser.avatar, (err: NodeJS.ErrnoException | null) => {
+          if (err) {
+            console.error("Error deleting previous avatar:", err);
+          } else {
+            console.log("Previous avatar deleted successfully");
+          }
+        });
+      }
+    } else if (!newUserData.avatar) {
+      newUserData.avatar = existingUser?.avatar;
     }
-    const updatedProfile: IUser = {
-      ...existingUser.toObject(), // Convertir a objeto para copiar todas las propiedades
-      ...req.body, // Sobrescribir con las nuevas propiedades del cuerpo de la solicitud
-    };
-    if (updatedProfile.password) {
+    if (newUserData.password) {
       const salt = await bcrypt.genSalt();
-      updatedProfile.password = await bcrypt.hash(
-        updatedProfile.password,
-        salt
-      );
+      newUserData.password = await bcrypt.hash(newUserData.password, salt);
     }
-    const updatedUser = await Users.findByIdAndUpdate(
-      req.userId,
-      updatedProfile,
-      { new: true }
-    );
 
-    if (!updatedProfile) throw new Error("error updating user");
-
-    updatedProfile.password = "";
-
-    res.status(201).json(updatedUser);
+    const updateUser = await Users.findByIdAndUpdate(req.userId, newUserData, {
+      new: true,
+    });
+    if (!updateUser) {
+      throw new Error("Fail updating New data to the existing User");
+    } else {
+      res.status(201).json(updateUser);
+    }
   } catch (error) {
     console.error(
       `Error updating own profile for user with ID ${req.userId}:`,

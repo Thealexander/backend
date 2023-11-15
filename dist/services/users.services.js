@@ -55,7 +55,7 @@ class UserService {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // console.log('id', userId)
-                const user = yield users_interface_1.default.findById(userId).select(["-password"]);
+                const user = yield users_interface_1.default.findById(userId); //.select(["-password"])
                 if (!user) {
                     throw new Error("User not found");
                 }
