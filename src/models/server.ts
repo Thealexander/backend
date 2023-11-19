@@ -23,10 +23,11 @@ class Server {
     this.app = express();
     this.port = process.env.PORT || "3001";
     this.server = http.createServer(this.app);
-
+    
     if (process.env.NODE_ENV === "development") {
       this.app.use(morgan("dev"));
     }
+    
 
     this.middlewares();
 
@@ -34,6 +35,8 @@ class Server {
     cn();
     initSocket(this.server);
     this.routes();
+    //console.log(this.app._router.stack)
+    
   }
   private middlewares():void {
     //cors
@@ -67,5 +70,6 @@ class Server {
       console.log("Corriendo en puerto " + this.port);
     });
   }
+  
 }
 export default Server;

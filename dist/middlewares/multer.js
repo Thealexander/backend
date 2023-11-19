@@ -7,7 +7,7 @@ const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
 const uuid_1 = require("uuid");
 const storage = multer_1.default.diskStorage({
-    destination: "./src/Uploads/profiles",
+    destination: path_1.default.join(__dirname, "src", "Uploads", "profiles"),
     filename: (req, file, cb) => {
         //const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
         cb(null, file.fieldname + "-" + (0, uuid_1.v4)() + path_1.default.extname(file.originalname));

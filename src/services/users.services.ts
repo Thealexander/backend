@@ -30,6 +30,7 @@ class UserService {
   }
   //Read Users
   async readAllUsers(userId: string) {
+    console.log('xxx')
     try {
       const allUsers = await Users.find({ _id: { $ne: userId } }).select([
         "-password",

@@ -73,6 +73,7 @@ const signin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.signin = signin;
 const profile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('xxx.xxx');
     try {
         const user = yield interfaces_1.Users.findById(req.userId);
         if (!user)
@@ -126,6 +127,7 @@ const logout = (req, res) => {
 };
 exports.logout = logout;
 const getMe = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("error si entra");
     try {
         const user = yield interfaces_1.Users.findById(req.userId);
         if (!user) {
@@ -165,15 +167,20 @@ const updateOwnProfile = (req, res) => __awaiter(void 0, void 0, void 0, functio
             return res.status(404).json({ error: "User not found" });
         }
         const newUserData = req.body;
-        console.info("Informacion a actualizar", newUserData);
+        //console.info("Informacion a actualizar", newUserData);
+        //console.info('datos de re.file', req.file)
         if (req.file) {
             const imgPath = req.file.filename;
             newUserData.avatar = imgPath;
+            //console.log('string del avatar', newUserData.avatar)
+            //console.log('string del avatar', existingUser.avatar)
             if (existingUser === null || existingUser === void 0 ? void 0 : existingUser.avatar) {
                 //eliminar imagen previa
-                yield fs_extra_1.default.unlink(path_1.default.resolve(existingUser === null || existingUser === void 0 ? void 0 : existingUser.avatar));
+                yield fs_extra_1.default.unlink(path_1.default.resolve("src/Uploads/profiles", existingUser === null || existingUser === void 0 ? void 0 : existingUser.avatar));
             }
         }
+        //console.log('string del avatar', newUserData.password)
+        //console.info('datos a actualizar', newUserData)
         if (req.body.password !== undefined && req.body.password !== null) {
             const salt = yield bcrypt_1.default.genSalt();
             newUserData.password = yield bcrypt_1.default.hash(newUserData.password, salt);

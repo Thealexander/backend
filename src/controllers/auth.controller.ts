@@ -45,6 +45,7 @@ export const signup = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Error creating user" });
   }
 };
+
 export const signin = async (req: Request, res: Response) => {
   try {
     // Buscar usuario por nombre de usuario
@@ -78,7 +79,9 @@ export const signin = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Error during login" });
   }
 };
+
 export const profile = async (req: ExtendedRequest, res: Response) => {
+ console.log('xxx.xxx')
   try {
     const user = await Users.findById(req.userId);
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -113,6 +116,7 @@ export const profile = async (req: ExtendedRequest, res: Response) => {
     res.status(500).json({ error: "Error fetching profile" });
   }
 };
+
 export const logout = (req: Request, res: Response) => {
   try {
     // Invalidar el token actual
@@ -134,7 +138,9 @@ export const logout = (req: Request, res: Response) => {
     res.status(500).json({ error: "Error during logout" });
   }
 };
+
 export const getMe = async (req: ExtendedRequest, res: Response) => {
+  console.log("error si entra")
   try {
     const user = await Users.findById(req.userId);
     if (!user) {
@@ -174,24 +180,27 @@ export const getMe = async (req: ExtendedRequest, res: Response) => {
 };
 
 export const updateOwnProfile = async (req: ExtendedRequest, res: Response) => {
-  try {
+   try {
     const existingUser = await Users.findById(req.userId);
     if (!existingUser) {
       return res.status(404).json({ error: "User not found" });
     }
-
     const newUserData = req.body;
-    console.info("Informacion a actualizar", newUserData);
-
+    //console.info("Informacion a actualizar", newUserData);
+    //console.info('datos de re.file', req.file)
     if (req.file) {
       const imgPath = req.file.filename;
       newUserData.avatar = imgPath;
+      //console.log('string del avatar', newUserData.avatar)
+      //console.log('string del avatar', existingUser.avatar)
       if (existingUser?.avatar) {
+
         //eliminar imagen previa
-        await fs.unlink(path.resolve(existingUser?.avatar));
+        await fs.unlink(path.resolve("src/Uploads/profiles", existingUser?.avatar));
       }
     }
-
+    //console.log('string del avatar', newUserData.password)
+    //console.info('datos a actualizar', newUserData)
     if (req.body.password !== undefined && req.body.password !== null) {
       const salt = await bcrypt.genSalt();
       newUserData.password = await bcrypt.hash(newUserData.password, salt);

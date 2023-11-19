@@ -4,7 +4,7 @@ import { Request } from "express";
 import { v4 as uuid } from "uuid";
 
 const storage = multer.diskStorage({
-  destination: "./src/Uploads/profiles",
+  destination:   path.join(__dirname, "src", "Uploads", "profiles"),
   filename: (req, file, cb): void => {
     //const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, file.fieldname + "-" + uuid() + path.extname(file.originalname));

@@ -29,6 +29,7 @@ class Server {
         (0, db_1.default)();
         (0, socketServer_1.default)(this.server);
         this.routes();
+        //console.log(this.app._router.stack)
     }
     middlewares() {
         //cors

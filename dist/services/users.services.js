@@ -43,6 +43,7 @@ class UserService {
     //Read Users
     readAllUsers(userId) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log('xxx');
             try {
                 const allUsers = yield users_interface_1.default.find({ _id: { $ne: userId } }).select([
                     "-password",

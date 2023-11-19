@@ -1,12 +1,10 @@
-import { signin, signup, profile, logout } from "./auth.controller";
+import { signin, signup, profile, logout, getMe, updateOwnProfile } from "./auth.controller";
 import {
   readUser,
   createUser,
   readAllUsers,
   updateUser,
   deleteUser,
-  getMe,
-  updateOwnProfile,
 } from "./users.controller";
 
 export {
@@ -20,5 +18,5 @@ export {
   updateUser,
   deleteUser,
   getMe,
-  updateOwnProfile,
+   updateOwnProfile
 };
