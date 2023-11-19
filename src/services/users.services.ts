@@ -2,6 +2,8 @@ import Users, { IUser } from "../interfaces/users.interface";
 import bcrypt from "bcrypt";
 
 import dotenv from "dotenv";
+import fs from "fs-extra";
+import path from "path";
 
 dotenv.config();
 
@@ -10,12 +12,13 @@ class UserService {
   async createUser(user: IUser) {
     try {
       if (typeof user.password !== "string") {
-          console.log("password", user.password);
+        console.log("password", user.password);
         throw new Error(" incorrect password ");
       }
       const salt = await bcrypt.genSalt();
       const hashedPassword = await bcrypt.hash(user.password, salt);
       user.password = hashedPassword;
+      //user.avatar = File.path
 
       const newUser = await Users.create(user);
 
@@ -28,9 +31,9 @@ class UserService {
   //Read Users
   async readAllUsers(userId: string) {
     try {
-      
-      
-      const allUsers = await Users.find({_id:{$ne: userId}}).select(["-password"]);
+      const allUsers = await Users.find({ _id: { $ne: userId } }).select([
+        "-password",
+      ]);
       return allUsers;
     } catch (error) {
       console.error("Error reading all users:", error);
@@ -40,7 +43,7 @@ class UserService {
   //Read User
   async readUser(userId: string) {
     try {
-       // console.log('id', userId)
+      // console.log('id', userId)
       const user = await Users.findById(userId); //.select(["-password"])
       if (!user) {
         throw new Error("User not found");
@@ -80,7 +83,7 @@ class UserService {
       if (!deletedUser) {
         throw new Error("User not found");
       }
-      return deletedUser;
+      return deletedUser && (await fs.unlink(path.resolve(deletedUser.avatar)));
     } catch (error) {
       console.error(`Error deleting user with ID ${userId}:`, error);
       throw new Error("Error deleting user");
@@ -96,8 +99,11 @@ class UserService {
       return null;
     }
   }
-// update info de perfil
-  async updateOwnProfile(userId: string, updatedProfile: IUser): Promise<IUser | null> {
+  // update info de perfil
+  async updateOwnProfile(
+    userId: string,
+    updatedProfile: IUser
+  ): Promise<IUser | null> {
     try {
       if (!userId) {
         throw new Error("User ID is undefined");
@@ -113,26 +119,35 @@ class UserService {
       if (updatedProfile.password) {
         // Hash de la nueva contraseña
         const salt = await bcrypt.genSalt();
-        updatedProfile.password = await bcrypt.hash(updatedProfile.password, salt);
+        updatedProfile.password = await bcrypt.hash(
+          updatedProfile.password,
+          salt
+        );
       }
 
       // Actualizar el perfil del usuario
-      const updatedUser = await Users.findByIdAndUpdate(userId, updatedProfile, { new: true });
+      const updatedUser = await Users.findByIdAndUpdate(
+        userId,
+        updatedProfile,
+        { new: true }
+      );
 
       if (!updatedUser) {
         throw new Error("Error updating user");
       }
 
       // No devolver la contraseña en la respuesta
-      updatedUser.password = '';
+      updatedUser.password = "";
 
       return updatedUser;
     } catch (error) {
-      console.error(`Error updating own profile for user with ID ${userId}:`, error);
+      console.error(
+        `Error updating own profile for user with ID ${userId}:`,
+        error
+      );
       return null;
     }
   }
-
 }
 
 export default new UserService();

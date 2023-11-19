@@ -2,18 +2,18 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import * as fs from "fs";
+import fs from "fs-extra";
+import path from "path";
 
 import { removeFromInvalidTokens } from "../middlewares";
 import { refreshAccessToken } from "../helpers/refreshToken";
 import { IPayload, IUser, Users } from "../interfaces/";
-import { getFilePath } from "../helpers/imgHelper";
-//import { IUser } from '../interfaces/users.interface';
 
 dotenv.config();
 
 interface ExtendedRequest extends Request {
   exp?: number;
+  avatar?: object;
 }
 
 export const signup = async (req: Request, res: Response) => {
@@ -21,7 +21,6 @@ export const signup = async (req: Request, res: Response) => {
     const salt = await bcrypt.genSalt();
     const hashpassword = await bcrypt.hash(req.body.password, salt);
     req.body.password = hashpassword;
-    req.body.avatar = "";
     req.body.username = req.body.username.toLowerCase();
     // req.body.email && (req.body.email = req.body.email.toLowerCase());
     // (!req.body.email) ? res.status(400).json({ error: "Email is required" }) : req.body.email = req.body.email.toLowerCase();
@@ -177,46 +176,37 @@ export const getMe = async (req: ExtendedRequest, res: Response) => {
 export const updateOwnProfile = async (req: ExtendedRequest, res: Response) => {
   try {
     const existingUser = await Users.findById(req.userId);
-    console.log("Usuario existente", existingUser);
-    console.log("Contenido de req.file", req.file);
+    if (!existingUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
     const newUserData = req.body;
-    console.log("Usuario existente", newUserData);
+    console.info("Informacion a actualizar", newUserData);
 
-    if (req.file && existingUser?.avatar) {
-      const imgPath = getFilePath(req.file);
-      console.log(imgPath);
+    if (req.file) {
+      const imgPath = req.file.filename;
       newUserData.avatar = imgPath;
       if (existingUser?.avatar) {
-        fs.unlink(existingUser.avatar, (err: NodeJS.ErrnoException | null) => {
-          if (err) {
-            console.error("Error deleting previous avatar:", err);
-          } else {
-            console.log("Previous avatar deleted successfully");
-          }
-        });
+        //eliminar imagen previa
+        await fs.unlink(path.resolve(existingUser?.avatar));
       }
-    } else if (!newUserData.avatar) {
-      newUserData.avatar = existingUser?.avatar;
     }
-    if (newUserData.password) {
+
+    if (req.body.password !== undefined && req.body.password !== null) {
       const salt = await bcrypt.genSalt();
       newUserData.password = await bcrypt.hash(newUserData.password, salt);
     }
-
-    const updateUser = await Users.findByIdAndUpdate(req.userId, newUserData, {
-      new: true,
-    });
-    if (!updateUser) {
-      throw new Error("Fail updating New data to the existing User");
+    const response = await Users.findByIdAndUpdate(req.userId, newUserData);
+    if (!response) {
+      return res.status(404).json({ error: "User not found" });
     } else {
-      res.status(201).json(updateUser);
+      return res.status(200).json(response);
     }
   } catch (error) {
     console.error(
       `Error updating own profile for user with ID ${req.userId}:`,
       error
     );
-    res.status(500).json({ error: "Error updating your profile" });
+    return res.status(500).json({ error: "Error updating your profile" });
   }
 };

@@ -1,27 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -39,19 +16,17 @@ exports.updateOwnProfile = exports.getMe = exports.logout = exports.profile = ex
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const fs = __importStar(require("fs"));
+const fs_extra_1 = __importDefault(require("fs-extra"));
+const path_1 = __importDefault(require("path"));
 const middlewares_1 = require("../middlewares");
 const refreshToken_1 = require("../helpers/refreshToken");
 const interfaces_1 = require("../interfaces/");
-const imgHelper_1 = require("../helpers/imgHelper");
-//import { IUser } from '../interfaces/users.interface';
 dotenv_1.default.config();
 const signup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const salt = yield bcrypt_1.default.genSalt();
         const hashpassword = yield bcrypt_1.default.hash(req.body.password, salt);
         req.body.password = hashpassword;
-        req.body.avatar = "";
         req.body.username = req.body.username.toLowerCase();
         // req.body.email && (req.body.email = req.body.email.toLowerCase());
         // (!req.body.email) ? res.status(400).json({ error: "Email is required" }) : req.body.email = req.body.email.toLowerCase();
@@ -186,45 +161,34 @@ exports.getMe = getMe;
 const updateOwnProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const existingUser = yield interfaces_1.Users.findById(req.userId);
-        console.log("Usuario existente", existingUser);
-        console.log("Contenido de req.file", req.file);
+        if (!existingUser) {
+            return res.status(404).json({ error: "User not found" });
+        }
         const newUserData = req.body;
-        console.log("Usuario existente", newUserData);
-        if (req.file && (existingUser === null || existingUser === void 0 ? void 0 : existingUser.avatar)) {
-            const imgPath = (0, imgHelper_1.getFilePath)(req.file);
-            console.log(imgPath);
+        console.info("Informacion a actualizar", newUserData);
+        if (req.file) {
+            const imgPath = req.file.filename;
             newUserData.avatar = imgPath;
             if (existingUser === null || existingUser === void 0 ? void 0 : existingUser.avatar) {
-                fs.unlink(existingUser.avatar, (err) => {
-                    if (err) {
-                        console.error("Error deleting previous avatar:", err);
-                    }
-                    else {
-                        console.log("Previous avatar deleted successfully");
-                    }
-                });
+                //eliminar imagen previa
+                yield fs_extra_1.default.unlink(path_1.default.resolve(existingUser === null || existingUser === void 0 ? void 0 : existingUser.avatar));
             }
         }
-        else if (!newUserData.avatar) {
-            newUserData.avatar = existingUser === null || existingUser === void 0 ? void 0 : existingUser.avatar;
-        }
-        if (newUserData.password) {
+        if (req.body.password !== undefined && req.body.password !== null) {
             const salt = yield bcrypt_1.default.genSalt();
             newUserData.password = yield bcrypt_1.default.hash(newUserData.password, salt);
         }
-        const updateUser = yield interfaces_1.Users.findByIdAndUpdate(req.userId, newUserData, {
-            new: true,
-        });
-        if (!updateUser) {
-            throw new Error("Fail updating New data to the existing User");
+        const response = yield interfaces_1.Users.findByIdAndUpdate(req.userId, newUserData);
+        if (!response) {
+            return res.status(404).json({ error: "User not found" });
         }
         else {
-            res.status(201).json(updateUser);
+            return res.status(200).json(response);
         }
     }
     catch (error) {
         console.error(`Error updating own profile for user with ID ${req.userId}:`, error);
-        res.status(500).json({ error: "Error updating your profile" });
+        return res.status(500).json({ error: "Error updating your profile" });
     }
 });
 exports.updateOwnProfile = updateOwnProfile;

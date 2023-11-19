@@ -15,6 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const users_interface_1 = __importDefault(require("../interfaces/users.interface"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const fs_extra_1 = __importDefault(require("fs-extra"));
+const path_1 = __importDefault(require("path"));
 dotenv_1.default.config();
 class UserService {
     //Create User
@@ -28,6 +30,7 @@ class UserService {
                 const salt = yield bcrypt_1.default.genSalt();
                 const hashedPassword = yield bcrypt_1.default.hash(user.password, salt);
                 user.password = hashedPassword;
+                //user.avatar = File.path
                 const newUser = yield users_interface_1.default.create(user);
                 return { user: newUser };
             }
@@ -41,7 +44,9 @@ class UserService {
     readAllUsers(userId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const allUsers = yield users_interface_1.default.find({ _id: { $ne: userId } }).select(["-password"]);
+                const allUsers = yield users_interface_1.default.find({ _id: { $ne: userId } }).select([
+                    "-password",
+                ]);
                 return allUsers;
             }
             catch (error) {
@@ -98,7 +103,7 @@ class UserService {
                 if (!deletedUser) {
                     throw new Error("User not found");
                 }
-                return deletedUser;
+                return deletedUser && (yield fs_extra_1.default.unlink(path_1.default.resolve(deletedUser.avatar)));
             }
             catch (error) {
                 console.error(`Error deleting user with ID ${userId}:`, error);
@@ -142,7 +147,7 @@ class UserService {
                     throw new Error("Error updating user");
                 }
                 // No devolver la contraseña en la respuesta
-                updatedUser.password = '';
+                updatedUser.password = "";
                 return updatedUser;
             }
             catch (error) {

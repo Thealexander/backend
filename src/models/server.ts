@@ -35,7 +35,7 @@ class Server {
     initSocket(this.server);
     this.routes();
   }
-  private middlewares() {
+  private middlewares():void {
     //cors
     this.app.use(cors());
     //body read
@@ -46,7 +46,7 @@ class Server {
     const publicF = path.join(__dirname, "..", "dist", "public"); // Ajusta la ruta según la estructura de tu proyecto
     this.app.use(express.static(publicF));
   }
-  private routes() {
+  private routes():void {
     this.app.use(this.apiPaths.usuarios, userRoutes);
     this.app.use(this.apiPaths.auth, authRoutes);
 

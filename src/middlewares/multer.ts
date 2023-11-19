@@ -1,23 +1,21 @@
-import multer, { FileFilterCallback } from "multer";
+import multer from "multer";
 import path from "path";
 import { Request } from "express";
+import { v4 as uuid } from "uuid";
 
 const storage = multer.diskStorage({
-  destination: "./src/Uploads",
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(
-      null,
-      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
-    );
+  destination: "./src/Uploads/profiles",
+  filename: (req, file, cb): void => {
+    //const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, file.fieldname + "-" + uuid() + path.extname(file.originalname));
   },
 });
 
 const fileFilter = (
   req: Request,
   file: Express.Multer.File,
-  cb: FileFilterCallback
-) => {
+  cb: multer.FileFilterCallback
+): void => {
   // Solo permitir archivos de imagen
   const allowedMimes = ["image/jpeg", "image/pjpeg", "image/png", "image/gif"];
 
