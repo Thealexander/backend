@@ -13,7 +13,7 @@ import {
   updateUser,
   deleteUser,
 } from "./users.controller";
-import { createChat } from "./chat.controller";
+import { createChat, readChats, deleteChat, readChat } from "./chat.controller";
 
 export {
   signin,
@@ -28,4 +28,7 @@ export {
   getMe,
   updateOwnProfile,
   createChat,
+  readChats,
+  deleteChat,
+  readChat
 };

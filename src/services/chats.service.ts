@@ -2,24 +2,70 @@ import { Chat, IChat } from "../interfaces";
 class ChatService {
   async createChat(chat: IChat) {
     try {
-      const { member_one, member_two } = await Chat.create(chat);
-
       const p_one = await Chat.findOne({
-        p_o: member_one,
-        p_t: member_two,
+        member_one: chat.member_one,
+        member_two: chat.member_two,
       });
+      console.log("pone", p_one);
+
       const p_two = await Chat.findOne({
-        p_o: member_two,
-        p_t: member_one,
+        member_one: chat.member_two,
+        member_two: chat.member_one,
       });
 
-      if (p_one || p_two) {
-        throw new Error("Ya existe un chat de ambos users");
+      console.log("ptwo", p_two);
+      if (p_one || !p_two) {
+        return { chatExists: true };
       }
+      const { member_one, member_two } = await Chat.create(chat);
+      console.log("info", { member_one, member_two });
+
       return { chat: { member_one, member_two } };
     } catch (error) {
       console.error("Error creating chat:", error);
       throw new Error("Error creating chat");
+    }
+  }
+
+  async readChats(userId: string) {
+    try {
+      const chats = await Chat.find({
+        $or: [{ member_one: userId }, { member_two: userId }],
+      })
+        .populate("member_one")
+        .populate("member_two");
+      return chats;
+    } catch (error) {
+      console.error("Error reading chats:", error);
+      throw new Error("Error reading chats");
+    }
+  }
+
+  async deleteChat(chatId: string) {
+    try {
+      console.log("chatid", chatId);
+      const deletedChat = await Chat.findByIdAndDelete(chatId);
+      return deletedChat;
+    } catch (error) {
+      console.error("Error deleting chat:", error);
+      throw new Error("Error deleting chat");
+    }
+  }
+
+  async readChat(chatId: string) {
+    try {
+      const chat = await Chat.findById(chatId)
+        .populate("member_one")
+        .populate("member_two");
+
+      if (!chat) {
+        throw new Error("Chat not found");
+      }
+
+      return { chat };
+    } catch (error) {
+      console.error("Error reading chat:", error);
+      throw new Error("Error reading chat");
     }
   }
 }
