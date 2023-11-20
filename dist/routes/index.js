@@ -3,9 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userRoutes = exports.authRoutes = void 0;
-const auth_1 = __importDefault(require("./auth"));
-exports.authRoutes = auth_1.default;
-const user_1 = __importDefault(require("./user"));
-exports.userRoutes = user_1.default;
+exports.chatRoutes = exports.userRoutes = exports.authRoutes = void 0;
+const auth_routes_1 = __importDefault(require("./auth.routes"));
+exports.authRoutes = auth_routes_1.default;
+const user_routes_1 = __importDefault(require("./user.routes"));
+exports.userRoutes = user_routes_1.default;
+const chat_routes_1 = __importDefault(require("./chat.routes"));
+exports.chatRoutes = chat_routes_1.default;
 //# sourceMappingURL=index.js.map

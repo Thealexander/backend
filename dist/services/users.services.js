@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const users_interface_1 = __importDefault(require("../interfaces/users.interface"));
+const interfaces_1 = require("../interfaces");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const fs_extra_1 = __importDefault(require("fs-extra"));
@@ -31,7 +31,7 @@ class UserService {
                 const hashedPassword = yield bcrypt_1.default.hash(user.password, salt);
                 user.password = hashedPassword;
                 //user.avatar = File.path
-                const newUser = yield users_interface_1.default.create(user);
+                const newUser = yield interfaces_1.Users.create(user);
                 return { user: newUser };
             }
             catch (error) {
@@ -45,7 +45,7 @@ class UserService {
         return __awaiter(this, void 0, void 0, function* () {
             console.log('xxx');
             try {
-                const allUsers = yield users_interface_1.default.find({ _id: { $ne: userId } }).select([
+                const allUsers = yield interfaces_1.Users.find({ _id: { $ne: userId } }).select([
                     "-password",
                 ]);
                 return allUsers;
@@ -61,7 +61,7 @@ class UserService {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // console.log('id', userId)
-                const user = yield users_interface_1.default.findById(userId); //.select(["-password"])
+                const user = yield interfaces_1.Users.findById(userId); //.select(["-password"])
                 if (!user) {
                     throw new Error("User not found");
                 }
@@ -82,7 +82,7 @@ class UserService {
                     const salt = yield bcrypt_1.default.genSalt();
                     updatedUser.password = yield bcrypt_1.default.hash(updatedUser.password, salt);
                 }
-                const user = yield users_interface_1.default.findByIdAndUpdate(userId, updatedUser, {
+                const user = yield interfaces_1.Users.findByIdAndUpdate(userId, updatedUser, {
                     new: true,
                 });
                 if (!user) {
@@ -100,7 +100,7 @@ class UserService {
     deleteUser(userId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const deletedUser = yield users_interface_1.default.findByIdAndDelete(userId);
+                const deletedUser = yield interfaces_1.Users.findByIdAndDelete(userId);
                 if (!deletedUser) {
                     throw new Error("User not found");
                 }
@@ -116,7 +116,7 @@ class UserService {
     getMe(userId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const user = yield users_interface_1.default.findById(userId);
+                const user = yield interfaces_1.Users.findById(userId);
                 return user;
             }
             catch (error) {
@@ -132,7 +132,7 @@ class UserService {
                 if (!userId) {
                     throw new Error("User ID is undefined");
                 }
-                const existingUser = yield users_interface_1.default.findById(userId);
+                const existingUser = yield interfaces_1.Users.findById(userId);
                 if (!existingUser) {
                     throw new Error("User not found");
                 }
@@ -143,7 +143,7 @@ class UserService {
                     updatedProfile.password = yield bcrypt_1.default.hash(updatedProfile.password, salt);
                 }
                 // Actualizar el perfil del usuario
-                const updatedUser = yield users_interface_1.default.findByIdAndUpdate(userId, updatedProfile, { new: true });
+                const updatedUser = yield interfaces_1.Users.findByIdAndUpdate(userId, updatedProfile, { new: true });
                 if (!updatedUser) {
                     throw new Error("Error updating user");
                 }

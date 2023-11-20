@@ -1,4 +1,4 @@
-import Users, { IUser } from "../interfaces/users.interface";
+import {Users, IUser } from "../interfaces";
 import bcrypt from "bcrypt";
 
 import dotenv from "dotenv";

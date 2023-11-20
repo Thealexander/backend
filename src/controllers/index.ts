@@ -1,4 +1,11 @@
-import { signin, signup, profile, logout, getMe, updateOwnProfile } from "./auth.controller";
+import {
+  signin,
+  signup,
+  profile,
+  logout,
+  getMe,
+  updateOwnProfile,
+} from "./auth.controller";
 import {
   readUser,
   createUser,
@@ -6,6 +13,7 @@ import {
   updateUser,
   deleteUser,
 } from "./users.controller";
+import { createChat } from "./chat.controller";
 
 export {
   signin,
@@ -18,5 +26,6 @@ export {
   updateUser,
   deleteUser,
   getMe,
-   updateOwnProfile
+  updateOwnProfile,
+  createChat,
 };

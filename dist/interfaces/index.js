@@ -3,7 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Users = void 0;
+exports.Chat = exports.Users = void 0;
 const users_interface_1 = __importDefault(require("./users.interface"));
 exports.Users = users_interface_1.default;
+const chat_interface_1 = __importDefault(require("./chat.interface"));
+exports.Chat = chat_interface_1.default;
 //# sourceMappingURL=index.js.map

@@ -1,8 +1,4 @@
-import UserService from './users.services'
+import UserService from "./users.services";
+import ChatService from "./chats.service";
 
-
-export {
-
-    UserService
-
-}
+export { UserService, ChatService };

@@ -1,4 +1,5 @@
-import authRoutes from "./auth";
-import userRoutes from "./user";
+import authRoutes from "./auth.routes";
+import userRoutes from "./user.routes";
+import chatRoutes from "./chat.routes";
 
-export { authRoutes, userRoutes };
+export { authRoutes, userRoutes, chatRoutes };

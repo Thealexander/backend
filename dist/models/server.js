@@ -17,6 +17,7 @@ class Server {
         this.apiPaths = {
             usuarios: '/api/users',
             auth: '/api/auth',
+            chat: '/api/chats'
         };
         this.app = (0, express_1.default)();
         this.port = process.env.PORT || "3001";
@@ -44,6 +45,7 @@ class Server {
     routes() {
         this.app.use(this.apiPaths.usuarios, routes_1.userRoutes);
         this.app.use(this.apiPaths.auth, routes_1.authRoutes);
+        this.app.use(this.apiPaths.chat, routes_1.chatRoutes);
         //404 error
         this.app.use((req, res) => {
             res.status(404).send("Not Found");

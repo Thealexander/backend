@@ -6,7 +6,7 @@ import path from "path";
 //import bodyParser from "body-parser";
 
 import initSocket from "./socketServer";
-import {authRoutes, userRoutes} from '../routes';
+import {authRoutes, chatRoutes, userRoutes} from '../routes';
 import cn from "./db";
 
 class Server {
@@ -15,6 +15,7 @@ class Server {
   private apiPaths = {
     usuarios: '/api/users',
     auth: '/api/auth',
+    chat: '/api/chats'
   };
 
   private server: http.Server;
@@ -52,6 +53,7 @@ class Server {
   private routes():void {
     this.app.use(this.apiPaths.usuarios, userRoutes);
     this.app.use(this.apiPaths.auth, authRoutes);
+    this.app.use(this.apiPaths.chat, chatRoutes);
 
     //404 error
     this.app.use((req: Request, res: Response) => {
