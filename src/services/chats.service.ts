@@ -14,7 +14,7 @@ class ChatService {
       });
 
       console.log("ptwo", p_two);
-      if (p_one || !p_two) {
+      if (p_one || p_two) {
         return { chatExists: true };
       }
       const { member_one, member_two } = await Chat.create(chat);

@@ -6,16 +6,17 @@ import path from "path";
 //import bodyParser from "body-parser";
 
 import initSocket from "./socketServer";
-import {authRoutes, chatRoutes, userRoutes} from '../routes';
+import { authRoutes, chatRoutes, userRoutes, chatMessages } from "../routes";
 import cn from "./db";
 
 class Server {
   private app: Application;
   private port: string;
   private apiPaths = {
-    usuarios: '/api/users',
-    auth: '/api/auth',
-    chat: '/api/chats'
+    usuarios: "/api/users",
+    auth: "/api/auth",
+    chat: "/api/chats",
+    chatMessage: "/api/chatmessages",
   };
 
   private server: http.Server;
@@ -24,11 +25,10 @@ class Server {
     this.app = express();
     this.port = process.env.PORT || "3001";
     this.server = http.createServer(this.app);
-    
+
     if (process.env.NODE_ENV === "development") {
       this.app.use(morgan("dev"));
     }
-    
 
     this.middlewares();
 
@@ -37,9 +37,8 @@ class Server {
     initSocket(this.server);
     this.routes();
     //console.log(this.app._router.stack)
-    
   }
-  private middlewares():void {
+  private middlewares(): void {
     //cors
     this.app.use(cors());
     //body read
@@ -50,10 +49,11 @@ class Server {
     const publicF = path.join(__dirname, "..", "dist", "public"); // Ajusta la ruta según la estructura de tu proyecto
     this.app.use(express.static(publicF));
   }
-  private routes():void {
+  private routes(): void {
     this.app.use(this.apiPaths.usuarios, userRoutes);
     this.app.use(this.apiPaths.auth, authRoutes);
     this.app.use(this.apiPaths.chat, chatRoutes);
+    this.app.use(this.apiPaths.chatMessage, chatMessages);
 
     //404 error
     this.app.use((req: Request, res: Response) => {
@@ -61,10 +61,10 @@ class Server {
     });
 
     // Error handling middleware
-  this.app.use((err: Error, req: Request, res: Response) => {
-    console.error(err.stack);
-    res.status(500).send('Something went wrong!');
-  });
+    this.app.use((err: Error, req: Request, res: Response) => {
+      console.error(err.stack);
+      res.status(500).send("Something went wrong!");
+    });
   }
 
   public listen() {
@@ -72,6 +72,5 @@ class Server {
       console.log("Corriendo en puerto " + this.port);
     });
   }
-  
 }
 export default Server;
