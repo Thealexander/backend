@@ -5,6 +5,6 @@ import {sendCMessage} from '../controllers'
 
 const router: Router = Router();
 
-router.post("/chats/message", tokenValidation, sendCMessage);
+router.post("/", tokenValidation, sendCMessage);
 
 export default router;

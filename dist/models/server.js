@@ -15,9 +15,10 @@ const db_1 = __importDefault(require("./db"));
 class Server {
     constructor() {
         this.apiPaths = {
-            usuarios: '/api/users',
-            auth: '/api/auth',
-            chat: '/api/chats'
+            usuarios: "/api/users",
+            auth: "/api/auth",
+            chat: "/api/chats",
+            chatMessage: "/api/chats/messages",
         };
         this.app = (0, express_1.default)();
         this.port = process.env.PORT || "3001";
@@ -46,6 +47,7 @@ class Server {
         this.app.use(this.apiPaths.usuarios, routes_1.userRoutes);
         this.app.use(this.apiPaths.auth, routes_1.authRoutes);
         this.app.use(this.apiPaths.chat, routes_1.chatRoutes);
+        this.app.use(this.apiPaths.chatMessage, routes_1.chatMessages);
         //404 error
         this.app.use((req, res) => {
             res.status(404).send("Not Found");
@@ -53,7 +55,7 @@ class Server {
         // Error handling middleware
         this.app.use((err, req, res) => {
             console.error(err.stack);
-            res.status(500).send('Something went wrong!');
+            res.status(500).send("Something went wrong!");
         });
     }
     listen() {

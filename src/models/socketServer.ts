@@ -1,25 +1,28 @@
-import { Server as SocketIoServer, Socket } from 'socket.io';
-import http from 'http';
+import { Server as SocketIoServer } from "socket.io";
+import http from "http";
 
+export let io: SocketIoServer | null = null;
 const initSocket = (server: http.Server) => {
-  const io = new SocketIoServer(server);
-
-  io.on('connection', (socket: Socket) => {
-    console.log(`${socket.id} connected.`);
-
-    socket.on('disconnect', () =>{
-      console.log("usuario desconectado");
-    });
-
-    socket.on('subscribe', (room:string) => {
-      socket.join(room);
-    });
-    socket.on('unsubscribe', (room:string)  => {
-      socket.leave(room);
-    })
-
-
+  io = new SocketIoServer(server, {
+    cors: {
+      origin: "*",
+    },
   });
+
+  // io.on("connection", (socket: Socket) => {
+  //   console.log(`${socket.id} connected.`);
+
+  //   socket.on("disconnect", () => {
+  //     console.log("usuario desconectado");
+  //   });
+
+  //   socket.on("subscribe", (room: string) => {
+  //     socket.join(room);
+  //   });
+  //   socket.on("unsubscribe", (room: string) => {
+  //     socket.leave(room);
+  //   });
+  // });
 };
 
 export default initSocket;

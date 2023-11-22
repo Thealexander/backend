@@ -16,7 +16,7 @@ class Server {
     usuarios: "/api/users",
     auth: "/api/auth",
     chat: "/api/chats",
-    chatMessage: "/api/chatmessages",
+    chatMessage: "/api/chats/messages",
   };
 
   private server: http.Server;

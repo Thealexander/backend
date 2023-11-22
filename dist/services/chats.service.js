@@ -24,7 +24,7 @@ class ChatService {
                     member_two: chat.member_one,
                 });
                 console.log("ptwo", p_two);
-                if (p_one || !p_two) {
+                if (p_one || p_two) {
                     return { chatExists: true };
                 }
                 const { member_one, member_two } = yield interfaces_1.Chat.create(chat);

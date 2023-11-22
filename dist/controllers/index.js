@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.readChat = exports.deleteChat = exports.readChats = exports.createChat = exports.updateOwnProfile = exports.getMe = exports.deleteUser = exports.updateUser = exports.readAllUsers = exports.createUser = exports.readUser = exports.logout = exports.profile = exports.signup = exports.signin = void 0;
+exports.sendCMessage = exports.readChat = exports.deleteChat = exports.readChats = exports.createChat = exports.updateOwnProfile = exports.getMe = exports.deleteUser = exports.updateUser = exports.readAllUsers = exports.createUser = exports.readUser = exports.logout = exports.profile = exports.signup = exports.signin = void 0;
 const auth_controller_1 = require("./auth.controller");
 Object.defineProperty(exports, "signin", { enumerable: true, get: function () { return auth_controller_1.signin; } });
 Object.defineProperty(exports, "signup", { enumerable: true, get: function () { return auth_controller_1.signup; } });
@@ -19,4 +19,6 @@ Object.defineProperty(exports, "createChat", { enumerable: true, get: function (
 Object.defineProperty(exports, "readChats", { enumerable: true, get: function () { return chat_controller_1.readChats; } });
 Object.defineProperty(exports, "deleteChat", { enumerable: true, get: function () { return chat_controller_1.deleteChat; } });
 Object.defineProperty(exports, "readChat", { enumerable: true, get: function () { return chat_controller_1.readChat; } });
+const chatMessage_controller_1 = require("./chatMessage.controller");
+Object.defineProperty(exports, "sendCMessage", { enumerable: true, get: function () { return chatMessage_controller_1.sendCMessage; } });
 //# sourceMappingURL=index.js.map
