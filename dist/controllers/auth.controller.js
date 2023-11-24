@@ -73,7 +73,6 @@ const signin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.signin = signin;
 const profile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('xxx.xxx');
     try {
         const user = yield interfaces_1.Users.findById(req.userId);
         if (!user)

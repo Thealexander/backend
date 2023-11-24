@@ -16,7 +16,7 @@ router.post("/signin", signin);
 router.get("/profile", tokenValidation, profile);
 router.post("/logout", tokenValidation, logout);
 router.get("/me", tokenValidation, getMe);
-router.patch("/me", tokenValidation,upload.single('avatar'), updateOwnProfile);
+router.patch("/me/:profiles", tokenValidation,upload.single('avatar'), updateOwnProfile);
 
 
 export default router;

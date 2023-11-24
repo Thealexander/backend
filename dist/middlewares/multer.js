@@ -6,23 +6,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
 const uuid_1 = require("uuid");
+const eDir = (req, file, cb) => {
+    const folder = req.params.folder || "images"; // Usar "profiles" como valor predeterminado si no se proporciona un parámetro de carpeta
+    const destination = path_1.default.join(__dirname, "../Uploads", folder);
+    cb(null, destination);
+};
 const storage = multer_1.default.diskStorage({
-    destination: path_1.default.join(__dirname, "src", "Uploads", "profiles"),
+    destination: eDir,
     filename: (req, file, cb) => {
-        //const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
         cb(null, file.fieldname + "-" + (0, uuid_1.v4)() + path_1.default.extname(file.originalname));
     },
 });
 const fileFilter = (req, file, cb) => {
-    // Solo permitir archivos de imagen
     const allowedMimes = ["image/jpeg", "image/pjpeg", "image/png", "image/gif"];
     if (allowedMimes.includes(file.mimetype)) {
         cb(null, true);
     }
     else {
         cb(new Error("Invalid file type. Only JPEG, PNG, and GIF are allowed."));
-        // const error = new Error("Invalid file type. Only JPEG, PNG, and GIF are allowed.");
-        //return next(error);
     }
 };
 const limits = {

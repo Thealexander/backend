@@ -9,6 +9,6 @@ router.post("/signin", controllers_1.signin);
 router.get("/profile", middlewares_1.tokenValidation, controllers_1.profile);
 router.post("/logout", middlewares_1.tokenValidation, controllers_1.logout);
 router.get("/me", middlewares_1.tokenValidation, controllers_1.getMe);
-router.patch("/me", middlewares_1.tokenValidation, middlewares_1.upload.single('avatar'), controllers_1.updateOwnProfile);
+router.patch("/me/:profiles", middlewares_1.tokenValidation, middlewares_1.upload.single('avatar'), controllers_1.updateOwnProfile);
 exports.default = router;
 //# sourceMappingURL=auth.routes.js.map

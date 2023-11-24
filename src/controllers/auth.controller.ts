@@ -81,8 +81,7 @@ export const signin = async (req: Request, res: Response) => {
 };
 
 export const profile = async (req: ExtendedRequest, res: Response) => {
- console.log('xxx.xxx')
-  try {
+   try {
     const user = await Users.findById(req.userId);
     if (!user) return res.status(404).json({ error: "User not found" });
 

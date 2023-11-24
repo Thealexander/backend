@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const interfaces_1 = require("../interfaces");
 const socketServer_1 = require("../models/socketServer");
 class ChatMessageService {
-    sendCMessage(chatMessage, userId) {
+    sendTM(chatMessage, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { message, chat } = chatMessage;
@@ -27,8 +27,6 @@ class ChatMessageService {
                 });
                 yield interfaces_1.ChatMessage.create(chat_message);
                 const dataUser = yield chat_message.populate("user");
-                //console.info("user", dataUser);
-                //sockets
                 socketServer_1.io === null || socketServer_1.io === void 0 ? void 0 : socketServer_1.io.sockets.in(chat_id).emit("message", dataUser);
                 socketServer_1.io === null || socketServer_1.io === void 0 ? void 0 : socketServer_1.io.sockets.in(`${chat_id}_notify`).emit("message_notify", dataUser);
                 //console.log("Message sent:", chat_message);
@@ -36,6 +34,51 @@ class ChatMessageService {
             catch (error) {
                 console.error("Error sending message:", error);
                 throw new Error("Error sending message");
+            }
+        });
+    }
+    sendIM(chatMessage, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { message, chat } = chatMessage;
+                const chat_id = chatMessage.chat.toString();
+                const user = userId;
+                //console.info("body", { message, chat, user });
+                console.log("Message sent:", chat_id);
+                const chat_message = new interfaces_1.ChatMessage({
+                    chat,
+                    user,
+                    message,
+                    type: "IMAGE",
+                });
+                console.log("Message sent:", chat_message);
+                yield interfaces_1.ChatMessage.create(chat_message);
+                const dataUser = yield chat_message.populate("user");
+                socketServer_1.io === null || socketServer_1.io === void 0 ? void 0 : socketServer_1.io.sockets.in(chat_id).emit("message", dataUser);
+                socketServer_1.io === null || socketServer_1.io === void 0 ? void 0 : socketServer_1.io.sockets.in(`${chat_id}_notify`).emit("message_notify", dataUser);
+            }
+            catch (error) {
+                console.error("Error sending message:", error);
+                throw new Error("Error sending message");
+            }
+        });
+    }
+    getMessages(chatId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // console.info("id", chatId);
+            try {
+                const chatMessages = yield interfaces_1.ChatMessage.find({ chat: chatId })
+                    .sort({
+                    createdAt: 1,
+                })
+                    .populate("user");
+                const total = yield interfaces_1.ChatMessage.find({ chat: chatId }).countDocuments();
+                //console.info("chatBdy", chatMessages);
+                return { chatMessages, total };
+            }
+            catch (error) {
+                console.error("Error reading messages:", error);
+                throw new Error("Error reading Messages");
             }
         });
     }

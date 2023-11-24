@@ -9,26 +9,65 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendCMessage = void 0;
+exports.getMessages = exports.sendIM = exports.sendTM = void 0;
 const services_1 = require("../services");
-const sendCMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const sendTM = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // console.info("info", req.body);
         // console.info("user", req.userId);
         const messageBody = req.body;
         const user = req.userId;
         if (!user) {
-            // Manejar el caso en el que req.userId es undefined
             throw new Error("User not found");
         }
-        yield services_1.ChatMessageService.sendCMessage(messageBody, user);
-        res.status(201).json({ msg: 'ok' });
+        yield services_1.ChatMessageService.sendTM(messageBody, user);
+        res.status(201).json({ msg: "ok" });
     }
     catch (error) {
         console.error(error);
         res.status(500).json({ error: "Error creating Message" });
     }
 });
-exports.sendCMessage = sendCMessage;
-//export const sendImageMessage = async (req: Request, res: Response) => {};
+exports.sendTM = sendTM;
+const sendIM = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        //console.info("info", req.body);
+        // console.info("user", req.userId);
+        const messageBody = req.body;
+        const user = req.userId;
+        if (!user) {
+            throw new Error("User not found");
+        }
+        if (req.file) {
+            const imgPath = req.file.filename;
+            //console.info("imagen", imgPath);
+            messageBody.message = imgPath;
+        }
+        yield services_1.ChatMessageService.sendIM(messageBody, user);
+        res.status(201).json({ msg: "ok" });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error creating Message" });
+    }
+});
+exports.sendIM = sendIM;
+const getMessages = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const chatId = req.params.chat;
+        //console.log("mensajes", chatId);
+        if (!chatId) {
+            throw new Error("Chat not found");
+        }
+        //console.info("id: ", chatId);
+        const { chatMessages, total } = yield services_1.ChatMessageService.getMessages(chatId);
+        //console.log("mensajes", messages);
+        res.status(200).json({ chatMessages, total });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error Reading Messages" });
+    }
+});
+exports.getMessages = getMessages;
 //# sourceMappingURL=chatMessage.controller.js.map

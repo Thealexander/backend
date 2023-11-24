@@ -3,10 +3,19 @@ import path from "path";
 import { Request } from "express";
 import { v4 as uuid } from "uuid";
 
+const eDir = (
+  req: Request,
+  file: Express.Multer.File,
+  cb: (error: Error | null, destination: string) => void
+): void => {
+  const folder = req.params.folder || "images"; // Usar "profiles" como valor predeterminado si no se proporciona un parámetro de carpeta
+  const destination = path.join(__dirname, "../Uploads", folder);
+  cb(null, destination);
+};
+
 const storage = multer.diskStorage({
-  destination:   path.join(__dirname, "src", "Uploads", "profiles"),
+  destination: eDir, //path.join(__dirname, "src", "Uploads", "profiles"),
   filename: (req, file, cb): void => {
-    //const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, file.fieldname + "-" + uuid() + path.extname(file.originalname));
   },
 });
@@ -16,15 +25,12 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: multer.FileFilterCallback
 ): void => {
-  // Solo permitir archivos de imagen
   const allowedMimes = ["image/jpeg", "image/pjpeg", "image/png", "image/gif"];
 
   if (allowedMimes.includes(file.mimetype)) {
     cb(null, true);
   } else {
     cb(new Error("Invalid file type. Only JPEG, PNG, and GIF are allowed."));
-    // const error = new Error("Invalid file type. Only JPEG, PNG, and GIF are allowed.");
-    //return next(error);
   }
 };
 
