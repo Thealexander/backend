@@ -82,6 +82,32 @@ class ChatMessageService {
             }
         });
     }
+    getTotalMessages(chatId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const total = yield interfaces_1.ChatMessage.find({ chat: chatId }).countDocuments();
+                return total;
+            }
+            catch (error) {
+                console.error("Error reading Total messages:", error);
+                throw new Error("Error reading Total Messages");
+            }
+        });
+    }
+    lastMessage(chatId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const lastMsg = yield interfaces_1.ChatMessage.findOne({ chat: chatId }).sort({
+                    createdAt: -1,
+                });
+                return lastMsg;
+            }
+            catch (error) {
+                console.error("Error reading Total messages:", error);
+                throw new Error("Error reading Total Messages");
+            }
+        });
+    }
 }
 exports.default = new ChatMessageService();
 //# sourceMappingURL=chatMessages.services.js.map

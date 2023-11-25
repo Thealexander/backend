@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { ChatMessageService } from "../services";
-import Chat from "../interfaces/chat.interface";
 
 export const sendTM = async (req: Request, res: Response) => {
   try {
@@ -68,5 +67,34 @@ export const getMessages = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error Reading Messages" });
+  }
+};
+
+export const getTotalMessages = async (req: Request, res: Response) => {
+  try {
+    const chatId = req.params.chat;
+
+    if (!chatId) {
+      throw new Error("Chat not found");
+    }
+    const total = await ChatMessageService.getTotalMessages(chatId);
+    res.status(200).json(total);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error Reading Total Messages" });
+  }
+};
+
+export const lastMessage = async (req: Request, res: Response) => {
+  const chatId = req.params.chat;
+  try {
+    if (!chatId) {
+      throw new Error("Chat not found");
+    }
+    const lastMsg = await ChatMessageService.lastMessage(chatId);
+    res.status(200).json(lastMsg || {});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error Reading Total Messages" });
   }
 };

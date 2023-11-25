@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMessages = exports.sendIM = exports.sendTM = void 0;
+exports.lastMessage = exports.getTotalMessages = exports.getMessages = exports.sendIM = exports.sendTM = void 0;
 const services_1 = require("../services");
 const sendTM = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -70,4 +70,34 @@ const getMessages = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.getMessages = getMessages;
+const getTotalMessages = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const chatId = req.params.chat;
+        if (!chatId) {
+            throw new Error("Chat not found");
+        }
+        const total = yield services_1.ChatMessageService.getTotalMessages(chatId);
+        res.status(200).json(total);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error Reading Total Messages" });
+    }
+});
+exports.getTotalMessages = getTotalMessages;
+const lastMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const chatId = req.params.chat;
+    try {
+        if (!chatId) {
+            throw new Error("Chat not found");
+        }
+        const lastMsg = yield services_1.ChatMessageService.lastMessage(chatId);
+        res.status(200).json(lastMsg || {});
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error Reading Total Messages" });
+    }
+});
+exports.lastMessage = lastMessage;
 //# sourceMappingURL=chatMessage.controller.js.map

@@ -1,4 +1,5 @@
-import { Chat, IChat } from "../interfaces";
+import { Chat, IChat, ChatMessage } from "../interfaces";
+
 class ChatService {
   async createChat(chat: IChat) {
     try {
@@ -34,7 +35,18 @@ class ChatService {
       })
         .populate("member_one")
         .populate("member_two");
-      return chats;
+
+      const arraysChat = [];
+      for await (const chat of chats) {
+        const response = await ChatMessage.findOne({ chat: chat._id }).sort({
+          createdAt: -1,
+        });
+        arraysChat.push({
+          ...chat._doc,
+          lastMessage_date: response?.createdAt || null,
+        });
+      }
+      return arraysChat;
     } catch (error) {
       console.error("Error reading chats:", error);
       throw new Error("Error reading chats");

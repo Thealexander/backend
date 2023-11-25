@@ -5,6 +5,7 @@ export interface IChatMessage extends Document {
   user: mongoose.Types.ObjectId;
   message: string;
   type?: "TEXT" | "IMAGE";
+  createdAt?: Record<string, unknown>;
 }
 
 const ChatMessageSchema = new mongoose.Schema(

@@ -8,6 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __asyncValues = (this && this.__asyncValues) || function (o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const interfaces_1 = require("../interfaces");
 class ChatService {
@@ -38,6 +45,7 @@ class ChatService {
         });
     }
     readChats(userId) {
+        var _a, e_1, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const chats = yield interfaces_1.Chat.find({
@@ -45,7 +53,26 @@ class ChatService {
                 })
                     .populate("member_one")
                     .populate("member_two");
-                return chats;
+                const arraysChat = [];
+                try {
+                    for (var _d = true, chats_1 = __asyncValues(chats), chats_1_1; chats_1_1 = yield chats_1.next(), _a = chats_1_1.done, !_a; _d = true) {
+                        _c = chats_1_1.value;
+                        _d = false;
+                        const chat = _c;
+                        const response = yield interfaces_1.ChatMessage.findOne({ chat: chat._id }).sort({
+                            createdAt: -1,
+                        });
+                        arraysChat.push(Object.assign(Object.assign({}, chat._doc), { lastMessage_date: (response === null || response === void 0 ? void 0 : response.createdAt) || null }));
+                    }
+                }
+                catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                finally {
+                    try {
+                        if (!_d && !_a && (_b = chats_1.return)) yield _b.call(chats_1);
+                    }
+                    finally { if (e_1) throw e_1.error; }
+                }
+                return arraysChat;
             }
             catch (error) {
                 console.error("Error reading chats:", error);

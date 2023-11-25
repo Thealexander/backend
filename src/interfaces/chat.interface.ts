@@ -3,6 +3,7 @@ import mongoose, { Model, Document } from "mongoose";
 export interface IChat extends Document {
   member_one: mongoose.Types.ObjectId;
   member_two: mongoose.Types.ObjectId;
+  _doc?: Record<string, unknown>;
 }
 
 const ChatSchema = new mongoose.Schema({

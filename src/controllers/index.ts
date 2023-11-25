@@ -14,7 +14,13 @@ import {
   deleteUser,
 } from "./users.controller";
 import { createChat, readChats, deleteChat, readChat } from "./chat.controller";
-import { sendIM, sendTM, getMessages } from "./chatMessage.controller";
+import {
+  sendIM,
+  sendTM,
+  getMessages,
+  getTotalMessages,
+  lastMessage,
+} from "./chatMessage.controller";
 
 export {
   signin,
@@ -35,4 +41,6 @@ export {
   sendIM,
   sendTM,
   getMessages,
+  getTotalMessages,
+  lastMessage,
 };

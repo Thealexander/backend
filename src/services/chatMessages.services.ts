@@ -54,19 +54,40 @@ class ChatMessageService {
     }
   }
   async getMessages(chatId: string) {
-   // console.info("id", chatId);
+    // console.info("id", chatId);
     try {
       const chatMessages = await ChatMessage.find({ chat: chatId })
         .sort({
           createdAt: 1,
         })
         .populate("user");
-        const total = await ChatMessage.find({ chat: chatId }).countDocuments();
+      const total = await ChatMessage.find({ chat: chatId }).countDocuments();
       //console.info("chatBdy", chatMessages);
-      return {chatMessages, total};
+      return { chatMessages, total };
     } catch (error) {
       console.error("Error reading messages:", error);
       throw new Error("Error reading Messages");
+    }
+  }
+
+  async getTotalMessages(chatId: string) {
+    try {
+      const total = await ChatMessage.find({ chat: chatId }).countDocuments();
+      return total;
+    } catch (error) {
+      console.error("Error reading Total messages:", error);
+      throw new Error("Error reading Total Messages");
+    }
+  }
+  async lastMessage(chatId: string) {
+    try {
+      const lastMsg = await ChatMessage.findOne({ chat: chatId }).sort({
+        createdAt: -1,
+      });
+      return lastMsg;
+    } catch (error) {
+      console.error("Error reading Total messages:", error);
+      throw new Error("Error reading Total Messages");
     }
   }
 }
