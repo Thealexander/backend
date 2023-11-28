@@ -18,7 +18,8 @@ class Server {
             usuarios: "/api/users",
             auth: "/api/auth",
             chat: "/api/chats",
-            chatMessage: "/api/chats/messages",
+            chatMessages: "/api/chats/messages",
+            groups: "/api/group",
         };
         this.app = (0, express_1.default)();
         this.port = process.env.PORT || "3001";
@@ -47,7 +48,8 @@ class Server {
         this.app.use(this.apiPaths.usuarios, routes_1.userRoutes);
         this.app.use(this.apiPaths.auth, routes_1.authRoutes);
         this.app.use(this.apiPaths.chat, routes_1.chatRoutes);
-        this.app.use(this.apiPaths.chatMessage, routes_1.chatMessages);
+        this.app.use(this.apiPaths.chatMessages, routes_1.chatMessagesRoutes);
+        this.app.use(this.apiPaths.groups, routes_1.groupRoutes);
         //404 error
         this.app.use((req, res) => {
             res.status(404).send("Not Found");

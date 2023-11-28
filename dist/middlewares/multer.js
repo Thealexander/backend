@@ -8,7 +8,7 @@ const path_1 = __importDefault(require("path"));
 const uuid_1 = require("uuid");
 const eDir = (req, file, cb) => {
     const folder = req.params.folder || "images"; // Usar "profiles" como valor predeterminado si no se proporciona un parámetro de carpeta
-    const destination = path_1.default.join(__dirname, "../Uploads", folder);
+    const destination = path_1.default.join(__dirname, "../Uploads/", folder);
     cb(null, destination);
 };
 const storage = multer_1.default.diskStorage({

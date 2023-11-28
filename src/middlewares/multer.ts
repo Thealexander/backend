@@ -9,7 +9,7 @@ const eDir = (
   cb: (error: Error | null, destination: string) => void
 ): void => {
   const folder = req.params.folder || "images"; // Usar "profiles" como valor predeterminado si no se proporciona un parámetro de carpeta
-  const destination = path.join(__dirname, "../Uploads", folder);
+  const destination = path.join(__dirname, "../Uploads/", folder);
   cb(null, destination);
 };
 

@@ -21,6 +21,13 @@ import {
   getTotalMessages,
   lastMessage,
 } from "./chatMessage.controller";
+import {
+  createGroup,
+  readsGroups,
+  getGroupInfo,
+  updateGroup,
+  exitGroup
+} from "./group.controller";
 
 export {
   signin,
@@ -43,4 +50,9 @@ export {
   getMessages,
   getTotalMessages,
   lastMessage,
+  createGroup,
+  readsGroups,
+  getGroupInfo,
+  updateGroup,
+  exitGroup
 };

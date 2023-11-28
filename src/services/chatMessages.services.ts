@@ -34,14 +34,14 @@ class ChatMessageService {
       const chat_id = chatMessage.chat.toString();
       const user = userId;
       //console.info("body", { message, chat, user });
-      console.log("Message sent:", chat_id);
+      //console.log("Message sent:", chat_id);
       const chat_message: IChatMessage = new ChatMessage({
         chat,
         user,
         message,
         type: "IMAGE",
       });
-      console.log("Message sent:", chat_message);
+      //console.log("Message sent:", chat_message);
 
       await ChatMessage.create(chat_message);
       const dataUser = await chat_message.populate("user");

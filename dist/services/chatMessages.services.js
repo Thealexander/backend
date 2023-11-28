@@ -44,14 +44,14 @@ class ChatMessageService {
                 const chat_id = chatMessage.chat.toString();
                 const user = userId;
                 //console.info("body", { message, chat, user });
-                console.log("Message sent:", chat_id);
+                //console.log("Message sent:", chat_id);
                 const chat_message = new interfaces_1.ChatMessage({
                     chat,
                     user,
                     message,
                     type: "IMAGE",
                 });
-                console.log("Message sent:", chat_message);
+                //console.log("Message sent:", chat_message);
                 yield interfaces_1.ChatMessage.create(chat_message);
                 const dataUser = yield chat_message.populate("user");
                 socketServer_1.io === null || socketServer_1.io === void 0 ? void 0 : socketServer_1.io.sockets.in(chat_id).emit("message", dataUser);

@@ -6,7 +6,13 @@ import path from "path";
 //import bodyParser from "body-parser";
 
 import initSocket from "./socketServer";
-import { authRoutes, chatRoutes, userRoutes, chatMessages } from "../routes";
+import {
+  authRoutes,
+  chatRoutes,
+  userRoutes,
+  chatMessagesRoutes,
+  groupRoutes,
+} from "../routes";
 import cn from "./db";
 
 class Server {
@@ -16,7 +22,8 @@ class Server {
     usuarios: "/api/users",
     auth: "/api/auth",
     chat: "/api/chats",
-    chatMessage: "/api/chats/messages",
+    chatMessages: "/api/chats/messages",
+    groups: "/api/group",
   };
 
   private server: http.Server;
@@ -53,7 +60,8 @@ class Server {
     this.app.use(this.apiPaths.usuarios, userRoutes);
     this.app.use(this.apiPaths.auth, authRoutes);
     this.app.use(this.apiPaths.chat, chatRoutes);
-    this.app.use(this.apiPaths.chatMessage, chatMessages);
+    this.app.use(this.apiPaths.chatMessages, chatMessagesRoutes);
+    this.app.use(this.apiPaths.groups, groupRoutes);
 
     //404 error
     this.app.use((req: Request, res: Response) => {
