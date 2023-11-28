@@ -28,7 +28,7 @@ const createGroup = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Error creating Message" });
+        res.status(500).json({ error: "Error creating Group" });
     }
 });
 exports.createGroup = createGroup;
@@ -61,7 +61,7 @@ const getGroupInfo = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Error creating Message" });
+        res.status(500).json({ error: "Error getting group info" });
     }
 });
 exports.getGroupInfo = getGroupInfo;
@@ -85,19 +85,19 @@ const updateGroup = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Error creating Message" });
+        res.status(500).json({ error: "Error updating group" });
     }
 });
 exports.updateGroup = updateGroup;
 const exitGroup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         if (!req.userId) {
-            throw new Error("User not found");
+            return res.status(404).json({ error: "User not found" });
         }
         const userId = req.userId;
         const groupId = req.params.groupId;
-        const updatedGroup = yield services_1.groupServices.exitGroup(userId, groupId);
-        res.status(200).json(updatedGroup);
+        const group = yield services_1.groupServices.exitGroup(userId, groupId);
+        res.status(200).json(group);
     }
     catch (error) {
         console.error(error);

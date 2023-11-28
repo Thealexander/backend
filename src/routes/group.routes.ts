@@ -19,11 +19,12 @@ router.post(
 );
 router.get("/", tokenValidation, readsGroups);
 router.get("/:groupId", tokenValidation, getGroupInfo);
+router.patch("/exit/:groupId", tokenValidation, exitGroup);
 router.patch(
-  "/:groupId/:groups",
+  "/:groupId/:gpictures",
   tokenValidation,
   upload.single("imgGroup"),
   updateGroup
 );
-router.patch("/exit/:groupId", tokenValidation, exitGroup);
+
 export default router;

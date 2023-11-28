@@ -20,8 +20,8 @@ class GroupService {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { participants, image, creator, name } = newgroup;
-                console.info("new group", participants);
-                //TODO: reparar almacenamiento de imagen, no se guarda en la carpeta correcta
+                console.info("info", newgroup);
+                participants.push({ user: creator });
                 const group = new interfaces_1.Group({
                     name,
                     creator,
@@ -30,11 +30,10 @@ class GroupService {
                 });
                 const createdGroup = yield interfaces_1.Group.create(group);
                 return createdGroup;
-                // console.log("group", group);
             }
             catch (error) {
-                console.error("Error sending message:", error);
-                throw new Error("Error sending message");
+                console.error("Error creating group:", error);
+                throw new Error("Error creating group");
             }
         });
     }
@@ -46,11 +45,10 @@ class GroupService {
                 })
                     .populate("creator")
                     .populate("participants.user");
-                //console.log("grupos", myGroups);
                 return myGroups;
             }
             catch (error) {
-                console.error("Error reading groupds:", error);
+                console.error("Error reading groups:", error);
                 throw new Error("Error searching your groups");
             }
         });
@@ -61,12 +59,11 @@ class GroupService {
                 const mygroupinfo = yield interfaces_1.Group.findById(groupId);
                 if (!mygroupinfo)
                     return { error: "Group not found" };
-                //console.info("grupo:", mygroupinfo);
                 return mygroupinfo;
             }
             catch (error) {
-                console.error("Error sending message:", error);
-                throw new Error("Error sending message");
+                console.error("Error getting group info:", error);
+                throw new Error("Error getting group info");
             }
         });
     }
@@ -74,14 +71,10 @@ class GroupService {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const oldGroupData = yield interfaces_1.Group.findById(groupId);
-                console.log("data anterior", oldGroupData);
-                //TODO: verificar la carpeta en donde se almacena las imagenes
                 if (oldGroupData === null || oldGroupData === void 0 ? void 0 : oldGroupData.image) {
                     const imagePath = path_1.default.resolve(__dirname, "../../src/Uploads/groups", oldGroupData === null || oldGroupData === void 0 ? void 0 : oldGroupData.image);
                     yield fs_extra_1.default.unlink(imagePath);
-                    console.log("Ruta del archivo a eliminar:", imagePath);
                 }
-                console.log("data nueva", newUGroupData);
                 const updGroup = yield interfaces_1.Group.findByIdAndUpdate(groupId, newUGroupData);
                 return updGroup;
             }
@@ -94,21 +87,70 @@ class GroupService {
     exitGroup(userId, groupId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const group = yield interfaces_1.Group.findById(groupId);
-                if (!group) {
-                    throw new Error("Group not found");
-                }
-                const isUserInGroup = group.participants.some((participant) => participant.user.toString() === userId);
-                if (!isUserInGroup) {
-                    throw new Error("User is not part of the group");
-                }
+                console.log("Group ID:", groupId);
+                const group = yield this.findGroupById(groupId);
+                this.validateUserInGroup(group, userId);
                 group.participants = group.participants.filter((participant) => participant.user.toString() !== userId);
-                yield group.save();
+                yield this.saveGroup(group);
+                if (group.image && group.participants.length === 0) {
+                    yield this.deleteImage(group.image);
+                }
                 return group;
             }
             catch (error) {
                 console.error("Error exiting group:", error);
                 throw new Error("Error exiting group");
+            }
+        });
+    }
+    findGroupById(groupId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                if (groupId === "exit") {
+                    throw new Error("Invalid group ID");
+                }
+                const group = yield interfaces_1.Group.findById(groupId);
+                if (!group) {
+                    throw new Error("Group not found");
+                }
+                return group;
+            }
+            catch (error) {
+                console.error("Error finding group by ID:", error);
+                throw new Error("Error finding group by ID");
+            }
+        });
+    }
+    validateUserInGroup(group, userId) {
+        const isUserInGroup = group.participants.some((participant) => participant.user.toString() === userId);
+        if (!isUserInGroup) {
+            throw new Error("User is not part of the group");
+        }
+    }
+    saveGroup(group) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield group.save();
+                return group;
+            }
+            catch (error) {
+                console.error("Error saving group:", error);
+                throw new Error("Error saving group");
+            }
+        });
+    }
+    deleteImage(imagePath) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (imagePath) {
+                try {
+                    const fullPath = path_1.default.resolve(__dirname, "../../src/Uploads/groups", imagePath);
+                    yield fs_extra_1.default.unlink(fullPath);
+                    console.log("Image deleted:", fullPath);
+                }
+                catch (error) {
+                    console.error("Error deleting image:", error);
+                    throw new Error("Error deleting image");
+                }
             }
         });
     }

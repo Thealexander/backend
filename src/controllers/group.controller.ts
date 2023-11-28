@@ -22,7 +22,7 @@ export const createGroup = async (req: Request, res: Response) => {
     res.status(200).json(createdGroup);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Error creating Message" });
+    res.status(500).json({ error: "Error creating Group" });
   }
 };
 export const readsGroups = async (req: Request, res: Response) => {
@@ -51,7 +51,7 @@ export const getGroupInfo = async (req: Request, res: Response) => {
     res.status(200).json(myGroupInfo);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Error creating Message" });
+    res.status(500).json({ error: "Error getting group info" });
   }
 };
 
@@ -77,21 +77,22 @@ export const updateGroup = async (req: Request, res: Response) => {
     res.status(200).json(updGroup);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Error creating Message" });
+    res.status(500).json({ error: "Error updating group" });
   }
 };
+
 export const exitGroup = async (req: Request, res: Response) => {
   try {
     if (!req.userId) {
-      throw new Error("User not found");
+      return res.status(404).json({ error: "User not found" });
     }
 
     const userId = req.userId as string;
     const groupId = req.params.groupId;
 
-    const updatedGroup = await groupServices.exitGroup(userId, groupId);
+    const group = await groupServices.exitGroup(userId, groupId);
 
-    res.status(200).json(updatedGroup);
+    res.status(200).json(group);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error exiting group" });

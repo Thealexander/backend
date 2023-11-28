@@ -6,9 +6,9 @@ class GroupService {
   async createGroup(newgroup: IGroup) {
     try {
       const { participants, image, creator, name } = newgroup;
+      console.info("info", newgroup);
+      participants.push({ user: creator });
 
-      console.info("new group", participants);
-      //TODO: reparar almacenamiento de imagen, no se guarda en la carpeta correcta
       const group: IGroup = new Group({
         name,
         creator,
@@ -17,10 +17,9 @@ class GroupService {
       });
       const createdGroup = await Group.create(group);
       return createdGroup;
-      // console.log("group", group);
     } catch (error) {
-      console.error("Error sending message:", error);
-      throw new Error("Error sending message");
+      console.error("Error creating group:", error);
+      throw new Error("Error creating group");
     }
   }
 
@@ -31,31 +30,27 @@ class GroupService {
       })
         .populate("creator")
         .populate("participants.user");
-      //console.log("grupos", myGroups);
       return myGroups;
     } catch (error) {
-      console.error("Error reading groupds:", error);
+      console.error("Error reading groups:", error);
       throw new Error("Error searching your groups");
     }
   }
+
   async getGroupInfo(groupId: string) {
     try {
       const mygroupinfo = await Group.findById(groupId);
       if (!mygroupinfo) return { error: "Group not found" };
-
-      //console.info("grupo:", mygroupinfo);
       return mygroupinfo;
     } catch (error) {
-      console.error("Error sending message:", error);
-      throw new Error("Error sending message");
+      console.error("Error getting group info:", error);
+      throw new Error("Error getting group info");
     }
   }
 
   async updateGroup(newUGroupData: IGroup, groupId: string) {
     try {
       const oldGroupData = await Group.findById(groupId);
-      console.log("data anterior", oldGroupData);
-      //TODO: verificar la carpeta en donde se almacena las imagenes
       if (oldGroupData?.image) {
         const imagePath = path.resolve(
           __dirname,
@@ -63,9 +58,7 @@ class GroupService {
           oldGroupData?.image
         );
         await fs.unlink(imagePath);
-        console.log("Ruta del archivo a eliminar:", imagePath);
       }
-      console.log("data nueva", newUGroupData);
       const updGroup = await Group.findByIdAndUpdate(groupId, newUGroupData);
       return updGroup;
     } catch (error) {
@@ -76,29 +69,74 @@ class GroupService {
 
   async exitGroup(userId: string, groupId: string) {
     try {
-      const group = await Group.findById(groupId);
-
-      if (!group) {
-        throw new Error("Group not found");
-      }
-      const isUserInGroup = group.participants.some(
-        (participant) => participant.user.toString() === userId
-      );
-
-      if (!isUserInGroup) {
-        throw new Error("User is not part of the group");
-      }
+      console.log("Group ID:", groupId);
+      const group = await this.findGroupById(groupId);
+      this.validateUserInGroup(group, userId);
 
       group.participants = group.participants.filter(
         (participant) => participant.user.toString() !== userId
       );
+      await this.saveGroup(group);
 
-      await group.save();
-
+      if (group.image && group.participants.length === 0) {
+        await this.deleteImage(group.image);
+      }
       return group;
     } catch (error) {
       console.error("Error exiting group:", error);
       throw new Error("Error exiting group");
+    }
+  }
+
+  private async findGroupById(groupId: string) {
+    try {
+      if (groupId === "exit") {
+        throw new Error("Invalid group ID");
+      }
+      const group = await Group.findById(groupId);
+      if (!group) {
+        throw new Error("Group not found");
+      }
+      return group;
+    } catch (error) {
+      console.error("Error finding group by ID:", error);
+      throw new Error("Error finding group by ID");
+    }
+  }
+
+  private validateUserInGroup(group: IGroup, userId: string) {
+    const isUserInGroup = group.participants.some(
+      (participant) => participant.user.toString() === userId
+    );
+    if (!isUserInGroup) {
+      throw new Error("User is not part of the group");
+    }
+  }
+
+  private async saveGroup(group: IGroup) {
+    try {
+      await group.save();
+      return group;
+    } catch (error) {
+      console.error("Error saving group:", error);
+      throw new Error("Error saving group");
+    }
+  }
+
+  private async deleteImage(imagePath: string | undefined) {
+    if (imagePath) {
+      try {
+        const fullPath = path.resolve(
+          __dirname,
+          "../../src/Uploads/groups",
+          imagePath
+        );
+        await fs.unlink(fullPath);
+        console.log("Image deleted:", fullPath);
+      } catch (error) {
+        console.error("Error deleting image:", error);
+        throw new Error("Error deleting image");
+      }
     }
   }
 }
