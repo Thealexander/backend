@@ -1,4 +1,4 @@
-import { Group, IGroup } from "../interfaces";
+import { Group, IGroup, Users } from "../interfaces";
 import fs from "fs-extra";
 import path from "path";
 
@@ -87,6 +87,74 @@ class GroupService {
       throw new Error("Error exiting group");
     }
   }
+  async addParticipants(
+    groupId: string,
+    participantIds: string[],
+    userId: string
+  ) {
+    try {
+      const bUGroup = await this.findGroupById(groupId);
+      //console.log("info anterior de grupo: ", bUGroup);
+      if (bUGroup.creator.toString() !== userId) {
+        throw new Error("Only the group creator can add participants");
+      }
+      //console.info("existentes: ", bUGroup.participants);
+      //console.info("nuevos: ", participantIds);
+
+      const ngroup: IGroup = new Group({
+        ...bUGroup._doc,
+        participants: [...bUGroup.participants, ...participantIds],
+      });
+      const createdGroup = await Group.findByIdAndUpdate(groupId, ngroup);
+
+      // console.info("grupo actualizado?:", ngroup);
+
+      return createdGroup;
+    } catch (error) {
+      console.error("Error adding participants:", error);
+      throw new Error("Error adding participants");
+    }
+  }
+  async banParticipants(groupId: string, userId: string) {
+    try {
+      // console.info("data", { groupId, userId });
+
+      const updateGroup = await this.findGroupById(groupId);
+
+      updateGroup.participants = updateGroup.participants.filter(
+        (participant) => participant.user.toString() !== userId
+      );
+
+      //  console.info("nueva data antes de guardar?", updateGroup);
+      await this.saveGroup(updateGroup);
+      return updateGroup;
+    } catch (error) {
+      // console.error("Error at the moment to try to ban an user:", error);
+      throw new Error("Error banning an user");
+    }
+  }
+  async outOftheGroup(groupId: string) {
+    try {
+      console.log("id", groupId);
+      const group = await Group.findById(groupId);
+      const participants =
+        group?.participants?.map((participant) =>
+          participant.user.toString()
+        ) || [];
+      const response = await Users.find({ _id: { $nin: participants } }).select(
+        ["-password"]
+      );
+
+      if (!response) {
+        return "no se encontro ningun usuario";
+      } else {
+        return response;
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      throw new Error("Error sending message");
+    }
+  }
 
   private async findGroupById(groupId: string) {
     try {
@@ -144,7 +212,7 @@ class GroupService {
 export default new GroupService();
 
 /*
- async exitGroup(group: IGroup) {
+ async outOftheGroup(group: IGroup) {
 
     try{
       console.log('')

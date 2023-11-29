@@ -103,6 +103,64 @@ class GroupService {
             }
         });
     }
+    addParticipants(groupId, participantIds, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const bUGroup = yield this.findGroupById(groupId);
+                //console.log("info anterior de grupo: ", bUGroup);
+                if (bUGroup.creator.toString() !== userId) {
+                    throw new Error("Only the group creator can add participants");
+                }
+                //console.info("existentes: ", bUGroup.participants);
+                //console.info("nuevos: ", participantIds);
+                const ngroup = new interfaces_1.Group(Object.assign(Object.assign({}, bUGroup._doc), { participants: [...bUGroup.participants, ...participantIds] }));
+                const createdGroup = yield interfaces_1.Group.findByIdAndUpdate(groupId, ngroup);
+                // console.info("grupo actualizado?:", ngroup);
+                return createdGroup;
+            }
+            catch (error) {
+                console.error("Error adding participants:", error);
+                throw new Error("Error adding participants");
+            }
+        });
+    }
+    banParticipants(groupId, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                // console.info("data", { groupId, userId });
+                const updateGroup = yield this.findGroupById(groupId);
+                updateGroup.participants = updateGroup.participants.filter((participant) => participant.user.toString() !== userId);
+                //  console.info("nueva data antes de guardar?", updateGroup);
+                yield this.saveGroup(updateGroup);
+                return updateGroup;
+            }
+            catch (error) {
+                // console.error("Error at the moment to try to ban an user:", error);
+                throw new Error("Error banning an user");
+            }
+        });
+    }
+    outOftheGroup(groupId) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                console.log("id", groupId);
+                const group = yield interfaces_1.Group.findById(groupId);
+                const participants = ((_a = group === null || group === void 0 ? void 0 : group.participants) === null || _a === void 0 ? void 0 : _a.map((participant) => participant.user.toString())) || [];
+                const response = yield interfaces_1.Users.find({ _id: { $nin: participants } }).select(["-password"]);
+                if (!response) {
+                    return "no se encontro ningun usuario";
+                }
+                else {
+                    return response;
+                }
+            }
+            catch (error) {
+                console.error("Error sending message:", error);
+                throw new Error("Error sending message");
+            }
+        });
+    }
     findGroupById(groupId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -157,7 +215,7 @@ class GroupService {
 }
 exports.default = new GroupService();
 /*
- async exitGroup(group: IGroup) {
+ async outOftheGroup(group: IGroup) {
 
     try{
       console.log('')

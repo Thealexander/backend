@@ -1,14 +1,15 @@
 import mongoose, { Model, Document } from "mongoose";
 
 export interface IGroupParticipant {
-  user: mongoose.Types.ObjectId;
+  user: mongoose.Types.ObjectId | string;
 }
 
 export interface IGroup extends Document {
   name: string;
   image: string;
   creator: mongoose.Types.ObjectId;
-  participants: IGroupParticipant[];
+  participants: IGroupParticipant[] ;
+  _doc?: Record<string, unknown>;
 }
 
 const GroupParticipantSchema = new mongoose.Schema({

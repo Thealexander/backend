@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.exitGroup = exports.updateGroup = exports.getGroupInfo = exports.readsGroups = exports.createGroup = void 0;
+exports.outOftheGroup = exports.banParticipants = exports.addParticipants = exports.exitGroup = exports.updateGroup = exports.getGroupInfo = exports.readsGroups = exports.createGroup = void 0;
 const services_1 = require("../services");
 const createGroup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -105,8 +105,65 @@ const exitGroup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.exitGroup = exitGroup;
+const addParticipants = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        if (!req.userId) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        //console.info("groupId: ", req.params.groupId);
+        //console.info("participants", req.body.participants);
+        if (!req.params.groupId || !req.body.participants) {
+            return res.status(400).json({ error: "Invalid request parameters" });
+        }
+        const userId = req.userId;
+        const groupId = req.params.groupId;
+        const participants = req.body.participants.map((userId) => ({
+            user: userId,
+        }));
+        // console.log("participantes", participants);
+        const updatedGroup = yield services_1.groupServices.addParticipants(groupId, participants, userId);
+        res.status(200).json(updatedGroup);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error adding all participants" });
+    }
+});
+exports.addParticipants = addParticipants;
+const banParticipants = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        //console.info("info:", req.body);
+        if (!req.userId) {
+            throw new Error("User not found");
+        }
+        const { groupId, userId } = req.body;
+        // console.info("info", { groupId, userId });
+        yield services_1.groupServices.banParticipants(groupId, userId);
+        res.status(200).json({ msg: "usuario baneado con exito" });
+    }
+    catch (error) {
+        // console.error(error);
+        res.status(500).json({ error: "Error banning user" });
+    }
+});
+exports.banParticipants = banParticipants;
+const outOftheGroup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        if (!req.userId) {
+            throw new Error("User not found");
+        }
+        const { groupId } = req.params;
+        const response = yield services_1.groupServices.outOftheGroup(groupId);
+        res.status(200).json(response);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error creating Message" });
+    }
+});
+exports.outOftheGroup = outOftheGroup;
 /*
-export const exitGroup = async (req: Request, res: Response) => {
+export const outOftheGroup = async (req: Request, res: Response) => {
 
   try {
     res.status(200).json("test");

@@ -54,7 +54,6 @@ export const getGroupInfo = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Error getting group info" });
   }
 };
-
 export const updateGroup = async (req: Request, res: Response) => {
   try {
     if (!req.userId) {
@@ -80,7 +79,6 @@ export const updateGroup = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Error updating group" });
   }
 };
-
 export const exitGroup = async (req: Request, res: Response) => {
   try {
     if (!req.userId) {
@@ -98,8 +96,74 @@ export const exitGroup = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Error exiting group" });
   }
 };
+
+export const addParticipants = async (req: Request, res: Response) => {
+  try {
+    if (!req.userId) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    //console.info("groupId: ", req.params.groupId);
+    //console.info("participants", req.body.participants);
+    if (!req.params.groupId || !req.body.participants) {
+      return res.status(400).json({ error: "Invalid request parameters" });
+    }
+
+    const userId = req.userId as string;
+    const groupId = req.params.groupId;
+    const participants = req.body.participants.map((userId: string) => ({
+      user: userId,
+    }));
+    // console.log("participantes", participants);
+
+    const updatedGroup = await groupServices.addParticipants(
+      groupId,
+      participants,
+      userId
+    );
+
+    res.status(200).json(updatedGroup);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error adding all participants" });
+  }
+};
+
+export const banParticipants = async (req: Request, res: Response) => {
+  try {
+    //console.info("info:", req.body);
+    if (!req.userId) {
+      throw new Error("User not found");
+    }
+
+    const { groupId, userId } = req.body;
+
+    // console.info("info", { groupId, userId });
+    await groupServices.banParticipants(groupId, userId);
+
+    res.status(200).json({ msg: "usuario baneado con exito" });
+  } catch (error) {
+    // console.error(error);
+    res.status(500).json({ error: "Error banning user" });
+  }
+};
+
+export const outOftheGroup = async (req: Request, res: Response) => {
+  try {
+    if (!req.userId) {
+      throw new Error("User not found");
+    }
+    const { groupId } = req.params;
+
+    const response = await groupServices.outOftheGroup(groupId);
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error creating Message" });
+  }
+};
 /*
-export const exitGroup = async (req: Request, res: Response) => {
+export const outOftheGroup = async (req: Request, res: Response) => {
 
   try {
     res.status(200).json("test");

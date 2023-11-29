@@ -26,7 +26,10 @@ import {
   readsGroups,
   getGroupInfo,
   updateGroup,
-  exitGroup
+  exitGroup,
+  addParticipants,
+  banParticipants,
+  outOftheGroup
 } from "./group.controller";
 
 export {
@@ -54,5 +57,8 @@ export {
   readsGroups,
   getGroupInfo,
   updateGroup,
-  exitGroup
+  exitGroup,
+  addParticipants,
+  banParticipants ,
+  outOftheGroup 
 };
