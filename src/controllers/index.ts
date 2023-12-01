@@ -29,8 +29,15 @@ import {
   exitGroup,
   addParticipants,
   banParticipants,
-  outOftheGroup
+  outOftheGroup,
 } from "./group.controller";
+import {
+  gsendIM,
+  gsendTM,
+  ggetMessages,
+  ggetTotalMessages,
+  glastMessage,
+} from "./groupMessages.controller";
 
 export {
   signin,
@@ -59,6 +66,11 @@ export {
   updateGroup,
   exitGroup,
   addParticipants,
-  banParticipants ,
-  outOftheGroup 
+  banParticipants,
+  outOftheGroup,
+  gsendIM,
+  gsendTM,
+  ggetMessages,
+  ggetTotalMessages,
+  glastMessage,
 };

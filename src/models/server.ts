@@ -12,6 +12,7 @@ import {
   userRoutes,
   chatMessagesRoutes,
   groupRoutes,
+  groupMessagesRoutes,
 } from "../routes";
 import cn from "./db";
 
@@ -24,6 +25,7 @@ class Server {
     chat: "/api/chats",
     chatMessages: "/api/chats/messages",
     groups: "/api/group",
+    gmessages: "/api/gmessages",
   };
 
   private server: http.Server;
@@ -62,7 +64,9 @@ class Server {
     this.app.use(this.apiPaths.chat, chatRoutes);
     this.app.use(this.apiPaths.chatMessages, chatMessagesRoutes);
     this.app.use(this.apiPaths.groups, groupRoutes);
-
+    this.app.use(this.apiPaths.gmessages, groupMessagesRoutes);
+   
+   
     //404 error
     this.app.use((req: Request, res: Response) => {
       res.status(404).send("Not Found");

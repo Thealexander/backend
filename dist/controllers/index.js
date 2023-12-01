@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.outOftheGroup = exports.banParticipants = exports.addParticipants = exports.exitGroup = exports.updateGroup = exports.getGroupInfo = exports.readsGroups = exports.createGroup = exports.lastMessage = exports.getTotalMessages = exports.getMessages = exports.sendTM = exports.sendIM = exports.readChat = exports.deleteChat = exports.readChats = exports.createChat = exports.updateOwnProfile = exports.getMe = exports.deleteUser = exports.updateUser = exports.readAllUsers = exports.createUser = exports.readUser = exports.logout = exports.profile = exports.signup = exports.signin = void 0;
+exports.glastMessage = exports.ggetTotalMessages = exports.ggetMessages = exports.gsendTM = exports.gsendIM = exports.outOftheGroup = exports.banParticipants = exports.addParticipants = exports.exitGroup = exports.updateGroup = exports.getGroupInfo = exports.readsGroups = exports.createGroup = exports.lastMessage = exports.getTotalMessages = exports.getMessages = exports.sendTM = exports.sendIM = exports.readChat = exports.deleteChat = exports.readChats = exports.createChat = exports.updateOwnProfile = exports.getMe = exports.deleteUser = exports.updateUser = exports.readAllUsers = exports.createUser = exports.readUser = exports.logout = exports.profile = exports.signup = exports.signin = void 0;
 const auth_controller_1 = require("./auth.controller");
 Object.defineProperty(exports, "signin", { enumerable: true, get: function () { return auth_controller_1.signin; } });
 Object.defineProperty(exports, "signup", { enumerable: true, get: function () { return auth_controller_1.signup; } });
@@ -34,4 +34,10 @@ Object.defineProperty(exports, "exitGroup", { enumerable: true, get: function ()
 Object.defineProperty(exports, "addParticipants", { enumerable: true, get: function () { return group_controller_1.addParticipants; } });
 Object.defineProperty(exports, "banParticipants", { enumerable: true, get: function () { return group_controller_1.banParticipants; } });
 Object.defineProperty(exports, "outOftheGroup", { enumerable: true, get: function () { return group_controller_1.outOftheGroup; } });
+const groupMessages_controller_1 = require("./groupMessages.controller");
+Object.defineProperty(exports, "gsendIM", { enumerable: true, get: function () { return groupMessages_controller_1.gsendIM; } });
+Object.defineProperty(exports, "gsendTM", { enumerable: true, get: function () { return groupMessages_controller_1.gsendTM; } });
+Object.defineProperty(exports, "ggetMessages", { enumerable: true, get: function () { return groupMessages_controller_1.ggetMessages; } });
+Object.defineProperty(exports, "ggetTotalMessages", { enumerable: true, get: function () { return groupMessages_controller_1.ggetTotalMessages; } });
+Object.defineProperty(exports, "glastMessage", { enumerable: true, get: function () { return groupMessages_controller_1.glastMessage; } });
 //# sourceMappingURL=index.js.map
