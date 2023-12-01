@@ -1,4 +1,4 @@
-import { Group, IGroup, Users } from "../interfaces";
+import { Group, IGroup, Users, GroupMessage } from "../interfaces";
 import fs from "fs-extra";
 import path from "path";
 
@@ -30,7 +30,21 @@ class GroupService {
       })
         .populate("creator")
         .populate("participants.user");
-      return myGroups;
+       
+      const arraysGroup = [];
+      for await (const group of myGroups) {
+        const response = await GroupMessage.findOne({ group: group._id }).sort({
+          createdAt: -1,
+        });
+        console.info('groupId', group._id )
+        console.info('lastMessage Date', response?.createdAt )
+        arraysGroup.push({
+          ...group._doc,
+          lastMessage_date: response?.createdAt || null,
+        });
+        //console.info('lastMessage Date', lastMessage_date )
+      }
+      return arraysGroup;
     } catch (error) {
       console.error("Error reading groups:", error);
       throw new Error("Error searching your groups");

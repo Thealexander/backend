@@ -8,6 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __asyncValues = (this && this.__asyncValues) || function (o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -38,6 +45,7 @@ class GroupService {
         });
     }
     readsGroups(userId) {
+        var _a, e_1, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const myGroups = yield interfaces_1.Group.find({
@@ -45,7 +53,28 @@ class GroupService {
                 })
                     .populate("creator")
                     .populate("participants.user");
-                return myGroups;
+                const arraysGroup = [];
+                try {
+                    for (var _d = true, myGroups_1 = __asyncValues(myGroups), myGroups_1_1; myGroups_1_1 = yield myGroups_1.next(), _a = myGroups_1_1.done, !_a; _d = true) {
+                        _c = myGroups_1_1.value;
+                        _d = false;
+                        const group = _c;
+                        const response = yield interfaces_1.GroupMessage.findOne({ group: group._id }).sort({
+                            createdAt: -1,
+                        });
+                        console.info('groupId', group._id);
+                        console.info('lastMessage Date', response === null || response === void 0 ? void 0 : response.createdAt);
+                        arraysGroup.push(Object.assign(Object.assign({}, group._doc), { lastMessage_date: (response === null || response === void 0 ? void 0 : response.createdAt) || null }));
+                    }
+                }
+                catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                finally {
+                    try {
+                        if (!_d && !_a && (_b = myGroups_1.return)) yield _b.call(myGroups_1);
+                    }
+                    finally { if (e_1) throw e_1.error; }
+                }
+                return arraysGroup;
             }
             catch (error) {
                 console.error("Error reading groups:", error);

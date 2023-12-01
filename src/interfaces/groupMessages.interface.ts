@@ -6,6 +6,7 @@ export interface IGroupMessage extends Document {
   message: string;
   type?: "TEXT" | "IMAGE"; 
   _doc?: Record<string, unknown>;
+  createdAt?: Record<string, unknown>;
 }
 
 const GroupMessagesSchema = new mongoose.Schema(
